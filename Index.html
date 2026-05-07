@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>PD Supply Track</title>
+<style>
+  :root {
+    --blue: #007aff;
+    --green: #34c759;
+    --red: #ff3b30;
+    --orange: #ff9500;
+    --purple: #af52de;
+    --gray: #8e8e93;
+    --bg: #f2f2f7;
+    --card: #ffffff;
+    --border: #e5e5ea;
+    --text: #1c1c1e;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); }
+
+  /* HEADER */
+  header { background: var(--card); border-bottom: 1px solid var(--border); padding: 16px; position: sticky; top: 0; z-index: 100; }
+  header h1 { font-size: 20px; font-weight: 700; }
+  header p { font-size: 13px; color: var(--gray); margin-top: 2px; }
+
+  /* STATS */
+  .stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; padding: 12px 16px; }
+  .stat { background: var(--card); border-radius: 12px; padding: 10px 6px; text-align: center; }
+  .stat-val { font-size: 24px; font-weight: 700; color: var(--blue); }
+  .stat-lbl { font-size: 10px; color: var(--gray); margin-top: 2px; }
+
+  /* TABS */
+  .tabs { display: flex; overflow-x: auto; background: var(--card); border-bottom: 1px solid var(--border); scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tabs button { flex-shrink: 0; padding: 12px 16px; border: none; background: none; font-size: 14px; color: var(--gray); cursor: pointer; border-bottom: 2px solid transparent; font-weight: 500; }
+  .tabs button.active { color: var(--blue); border-bottom-color: var(--blue); font-weight: 600; }
+
+  /* PANELS */
+  .panel { padding: 16px; display: none; }
+  .panel.active { display: block; }
+
+  /* TOOLBAR */
+  .toolbar { display: flex; gap: 8px; margin-bottom: 12px; }
+  .search { flex: 1; padding: 10px 14px; border: 1px solid var(--border); border-radius: 12px; font-size: 16px; background: var(--card); color: var(--text); }
+  .search:focus { outline: 2px solid var(--blue); border-color: transparent; }
+
+  /* BUTTONS */
+  .btn { padding: 10px 16px; border: none; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; background: var(--blue); color: #fff; }
+  .btn-secondary { background: var(--border); color: var(--text); }
+  .btn-green { background: var(--green); }
+  .btn-red { background: var(--red); }
+  .btn-purple { background: var(--purple); }
+  .btn-full { width: 100%; padding: 14px; font-size: 16px; border-radius: 14px; margin-top: 8px; }
+
+  /* FILTERS */
+  .filters { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 16px; scrollbar-width: none; padding-bottom: 2px; }
+  .filters::-webkit-scrollbar { display: none; }
+  .filter-btn { flex-shrink: 0; padding: 6px 14px; border: 1px solid var(--border); border-radius: 20px; font-size: 13px; background: var(--card); color: var(--gray); cursor: pointer; }
+  .filter-btn.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+
+  /* ITEM CARDS */
+  .item-list { display: flex; flex-direction: column; gap: 10px; }
+  .item-card { background: var(--card); border-radius: 14px; padding: 14px; cursor: pointer; border: 2px solid transparent; transition: border-color 0.15s; }
+  .item-card.active { border-color: var(--blue); }
+  .item-card.warn { border-left: 4px solid var(--orange); }
+  .item-card.crit { border-left: 4px solid var(--red); }
+  .item-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .item-name { font-size: 16px; font-weight: 600; flex: 1; }
+  .item-meta { font-size: 13px; color: var(--gray); margin-top: 4px; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .chip { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+  .chip-blue { background: #dbeafe; color: #1d4ed8; }
+  .chip-purple { background: #ede9fe; color: #6d28d9; }
+  .chip-red { background: #ffd6d6; color: #c00; }
+  .chip-green { background: #d1f0da; color: #1a7f37; }
+  .chip-orange { background: #fff3cd; color: #856404; }
+
+  /* EMPTY STATE */
+  .empty { text-align: center; padding: 48px 24px; color: var(--gray); }
+  .empty-icon { font-size: 48px; margin-bottom: 12px; }
+  .empty h3 { font-size: 17px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .empty p { font-size: 14px; line-height: 1.5; }
+
+  /* EDITOR SHEET */
+  .editor-sheet { background: var(--card); border-radius: 16px; padding: 16px; margin-top: 12px; display: none; }
+  .editor-sheet.open { display: block; }
+  .editor-title { font-size: 17px; font-weight: 700; margin-bottom: 16px; }
+  .field-group { display: flex; flex-direction: column; gap: 12px; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .field { display: flex; flex-direction: column; gap: 4px; }
+  .field label { font-size: 12px; color: var(--gray); font-weight: 500; text-transform: uppercase; letter-spacing: 0.3px; }
+  .field input, .field select, .field textarea {
+    padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px;
+    font-size: 16px; background: var(--bg); color: var(--text); width: 100%;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus { outline: 2px solid var(--blue); border-color: transparent; }
+  .field textarea { resize: vertical; min-height: 70px; }
+  .field-full { grid-column: 1 / -1; }
+  .section-label { font-size: 13px; font-weight: 600; color: var(--gray); text-transform: uppercase; letter-spacing: 0.5px; margin: 4px 0 2px; }
+  .divider { height: 1px; background: var(--border); margin: 8px 0; }
+  .editor-actions { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+
+  /* INFO BOX */
+  .info-box { background: #dbeafe; border-radius: 12px; padding: 12px 14px; font-size: 14px; color: #1d4ed8; margin-bottom: 14px; line-height: 1.5; }
+
+  /* HANDOFF / CLINIC CARDS */
+  .order-card { background: var(--card); border-radius: 14px; padding: 14px; margin-bottom: 10px; }
+  .order-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .order-card h4 { font-size: 16px; font-weight: 600; flex: 1; }
+  .order-meta { font-size: 13px; color: var(--gray); margin-top: 4px; }
+
+  /* HISTORY */
+  .history-card { background: var(--card); border-radius: 14px; padding: 14px; margin-bottom: 10px; }
+  .history-top { display: flex; justify-content: space-between; align-items: center; }
+  .history-date { font-size: 12px; color: var(--gray); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>PD Supply Track</h1>
+  <p>Bi-weekly · MyBaxter · Clinic</p>
+</header>
+
+<div class="stats">
+  <div class="stat"><div class="stat-val" id="cntItems">0</div><div class="stat-lbl">Items</div></div>
+  <div class="stat"><div class="stat-val" id="cntReorder">0</div><div class="stat-lbl">Reorder</div></div>
+  <div class="stat"><div class="stat-val" id="cntClinic">0</div><div class="stat-lbl">Clinic</div></div>
+  <div class="stat"><div class="stat-val" id="cntHistory">0</div><div class="stat-lbl">History</div></div>
+</div>
+
+<div class="tabs">
+  <button class="active" data-tab="inventory">Inventory</button>
+  <button data-tab="baxter">MyBaxter</button>
+  <button data-tab="clinic">Clinic</button>
+  <button data-tab="history">History</button>
+</div>
+
+<!-- INVENTORY -->
+<div class="panel active" id="tab-inventory">
+  <div class="toolbar">
+    <input class="search" id="search" type="search" placeholder="Search…">
+    <button class="btn" id="btnNew">+ New</button>
+  </div>
+  <div class="filters">
+    <button class="filter-btn active" data-f="all">All</button>
+    <button class="filter-btn" data-f="reorder">Order now</button>
+    <button class="filter-btn" data-f="pd">PD</button>
+    <button class="filter-btn" data-f="support">Support</button>
+    <button class="filter-btn" data-f="emergency">Emergency</button>
+    <button class="filter-btn" data-f="clinic">Clinic</button>
+  </div>
+  <div class="item-list" id="itemList"></div>
+  <div class="editor-sheet" id="editorSheet">
+    <div class="editor-title" id="editorTitle">New supply</div>
+    <div class="field-group">
+      <div class="field">abel>Supply name</label><input id="fName" type="text" placeholder="e.g. 2.5% solution bags"></div>
+      <div class="field-row">
+        <div class="field">abel>Category</label>
+          <select id="fCategory">
+            <option>PD supplies</option>
+            <option>Support supplies</option>
+            <option>Emergency kit</option>
+            <option>Medications</option>
+          </select>
+        </div>
+        <div class="field">abel>Unit</label><input id="fUnit" type="text" placeholder="bags, boxes…"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="section-label">Quantities</div>
+      <div class="field-row">
+        <div class="field">abel>On hand</label><input id="fOnHand" type="number" min="0" placeholder="0"></div>
+        <div class="field">abel>Bi-weekly need</label><input id="fBiweekly" type="number" min="0" placeholder="0"></div>
+      </div>
+      <div class="field-row">
+        <div class="field">abel>Reorder at</label><input id="fReorderPoint" type="number" min="0" placeholder="0"></div>
+        <div class="field">abel>Emergency min</label><input id="fEmergencyMin" type="number" min="0" placeholder="0"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="section-label">Order planning</div>
+      <div class="field-row">
+        <div class="field">abel>Already ordered</label><input id="fOrderedQty" type="number" min="0" placeholder="0"></div>
+        <div class="field">abel>Portal status</label>
+          <select id="fDeliveryStatus">
+            <option value="not ordered">Not ordered</option>
+            <option value="ordered">Ordered</option>
+            <option value="partially received">Partial</option>
+            <option value="delivered">Delivered</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">abel>Plan: home delivery</label><input id="fHomeQty" type="number" min="0" placeholder="0"></div>
+        <div class="field">abel>Plan: clinic pickup</label><input id="fClinicQty" type="number" min="0" placeholder="0"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="section-label">Details</div>
+      <div class="field-row">
+        <div class="field">abel>Storage location</label><input id="fStorage" type="text" placeholder="Closet, shelf…"></div>
+        <div class="field">abel>Expiration date</label><input id="fExpiry" type="date"></div>
+      </div>
+      <div class="field">abel>Notes</label><textarea id="fNotes" placeholder="Brand, clinic instructions…"></textarea></div>
+    </div>
+    <div class="editor-actions">
+      <button class="btn" id="btnSave">Save</button>
+      <button class="btn btn-secondary" id="btnDup">Duplicate</button>
+      <button class="btn btn-red" id="btnDel">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- MYBAXTER -->
+<div class="panel" id="tab-baxter">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+    <div><p style="font-size:12px;color:var(--gray)">Home delivery</p><h2 style="font-size:20px;font-weight:700">MyBaxter order</h2></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-secondary" id="btnCopyHandoff">Copy</button>
+      <button class="btn" id="btnOpenBaxter">Open portal</button>
+    </div>
+  </div>
+  <div class="info-box">Review your planned quantities, open MyBaxter to place the order, then tap Mark submitted.</div>
+  <div id="handoffSummary" style="margin-bottom:12px"></div>
+  <div id="handoffList"></div>
+  <button class="btn btn-green btn-full" id="btnMarkSubmitted">✓ Mark submitted to MyBaxter</button>
+</div>
+
+<!-- CLINIC -->
+<div class="panel" id="tab-clinic">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+    <div><p style="font-size:12px;color:var(--gray)">From clinic</p><h2 style="font-size:20px;font-weight:700">Clinic pickup</h2></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-secondary" id="btnCopyClinic">Copy</button>
+      <button class="btn btn-purple" id="btnMarkAllPickup">All picked up</button>
+    </div>
+  </div>
+  <div class="info-box">Items planned for clinic pickup. Share the list with your PD nurse and mark each item when received.</div>
+  <div id="clinicList"></div>
+</div>
+
+<!-- HISTORY -->
+<div class="panel" id="tab-history">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <h2 style="font-size:20px;font-weight:700">Order history</h2>
+    <button class="btn btn-red" id="btnClearHistory">Clear</button>
+  </div>
+  <div id="historyList"></div>
+</div>
+
+<script>
+const KEY = 'pd-v4';
+const get = id => document.getElementById(id);
+const esc = s => String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num = v => Number(v) || 0;
+
+let state = (() => { try { return JSON.parse(localStorage.getItem(KEY)) || null; } catch(e) { return null; } })()
+  || { tab: 'inventory', filter: 'all', selectedId: null, items: [], history: [] };
+
+const save = () => localStorage.setItem(KEY, JSON.stringify(state));
+const uid = () => 'PD-' + Math.random().toString(36).substr(2,6).toUpperCase();
+
+const reorderQty = i => Math.max(0, num(i.biweeklyNeed) - num(i.onHand) - num(i.orderedQty));
+const needsReorder = i => reorderQty(i) > 0 || num(i.onHand) <= num(i.reorderPoint);
+const daysLeft = i => {
+  if (!i.expiry) return null;
+  return Math.ceil((new Date(i.expiry) - new Date()) / 86400000);
+};
+
+function badge(item) {
+  const oh = num(item.onHand), rp = num(item.reorderPoint), em = num(item.emergencyMin), rq = reorderQty(item);
+  const d = daysLeft(item);
+  if (oh <= 0) return ['Out of stock', 'chip-red'];
+  if (em > 0 && oh < em) return ['Below emergency min', 'chip-red'];
+  if (oh <= rp) return ['Reorder now', 'chip-red'];
+  if (rq > 0) return ['Order needed', 'chip-orange'];
+  if (d !== null && d <= 30) return [`Exp in ${d}d`, 'chip-orange'];
+  return ['Stocked', 'chip-green'];
+}
+
+function planned() {
+  return state.items.filter(needsReorder).map(item => {
+    const total = reorderQty(item);
+    let ph = num(item.homeQty), pc = num(item.clinicQty);
+    if (!ph && !pc) ph = total;
+    ph = Math.min(ph, total); pc = Math.min(pc, total);
+    return { ...item, total, planHome: ph, planClinic: pc };
+  }).filter(i => i.total > 0 || num(i.onHand) <= num(i.reorderPoint));
+}
+
+function render() {
+  renderStats();
+  renderTabs();
+  renderList();
+  renderBaxter();
+  renderClinic();
+  renderHistory();
+}
+
+function renderStats() {
+  get('cntItems').textContent = state.items.length;
+  get('cntReorder').textContent = state.items.filter(needsReorder).length;
+  get('cntClinic').textContent = state.items.filter(i => num(i.clinicQty) > 0).length;
+  get('cntHistory').textContent = state.history.length;
+}
+
+function renderTabs() {
+  document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === state.tab));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + state.tab));
+}
+
+function renderList() {
+  const q = (get('search').value || '').toLowerCase();
+  const f = state.filter;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.f === f));
+
+  let items = state.items.filter(item => {
+    const cat = (item.category || '').toLowerCase();
+    if (q && !(item.name||'').toLowerCase().includes(q) && !cat.includes(q)) return false;
+    if (f === 'reorder') return needsReorder(item);
+    if (f === 'pd') return cat.includes('pd');
+    if (f === 'support') return cat.includes('support');
+    if (f === 'emergency') return cat.includes('emergency') || num(item.emergencyMin) > 0;
+    if (f === 'clinic') return num(item.clinicQty) > 0;
+    return true;
+  });
+
+  if (!items.length) {
+    get('itemList').innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">📦</div>
+        <h3>${f === 'all' ? 'No supplies yet' : 'Nothing here'}</h3>
+        <p>${f === 'all' ? 'Tap + New to add your first supply item.' : 'Try a different filter.'}</p>
+      </div>`;
+    get('editorSheet').classList.remove('open');
+    return;
+  }
+
+  get('itemList').innerHTML = items.map(item => {
+    const [label, cls] = badge(item);
+    const oh = num(item.onHand
