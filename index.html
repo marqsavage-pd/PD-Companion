@@ -23,10 +23,8 @@
       --success-soft: #eefbf2;
       --shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
       --radius: 22px;
-      --radius-sm: 16px;
       --tabbar-h: 88px;
     }
-
     [data-theme="dark"] {
       --bg: #08111f;
       --surface: rgba(15,23,42,0.88);
@@ -44,436 +42,409 @@
       --success-soft: rgba(22, 101, 52, 0.28);
       --shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
     }
-
     * { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif; background: radial-gradient(circle at top, rgba(45,212,191,0.14), transparent 28%), var(--bg); color: var(--text); }
     body { min-height: 100vh; }
     button, input, select, textarea { font: inherit; }
     button { cursor: pointer; border: 0; }
     .app { max-width: 860px; margin: 0 auto; min-height: 100vh; padding: env(safe-area-inset-top) 16px calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 20px); }
-
-    .topbar {
-      position: sticky; top: 0; z-index: 10; padding: 12px 0 14px;
-      backdrop-filter: blur(18px);
-      background: linear-gradient(to bottom, rgba(244,247,251,0.90), rgba(244,247,251,0.60), transparent);
-    }
-    [data-theme="dark"] .topbar {
-      background: linear-gradient(to bottom, rgba(8,17,31,0.92), rgba(8,17,31,0.65), transparent);
-    }
-
-    .topbar-row { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; }
-    .eyebrow { font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; font-weight:700; }
-    .title { font-size:28px; line-height:1.1; margin:0; font-weight:800; }
-    .subtitle { margin:6px 0 0; color:var(--muted); font-size:14px; max-width: 56ch; }
-    .actions { display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; }
-    .pill-btn {
-      border-radius: 999px; padding: 10px 14px; background: var(--surface);
-      color: var(--text); border: 1px solid var(--line); box-shadow: var(--shadow);
-      display:inline-flex; align-items:center; gap:8px; font-weight:700;
-    }
-    .pill-btn.primary { background: linear-gradient(135deg, var(--primary), var(--primary-2)); color: white; border-color: transparent; }
-    .pill-btn.ghost { background: transparent; box-shadow: none; }
-
-    .banner {
-      background: linear-gradient(135deg, rgba(45,212,191,0.14), rgba(15,118,110,0.08));
-      border: 1px solid rgba(45,212,191,0.22);
-      border-radius: var(--radius);
-      padding: 16px;
-      margin: 10px 0 16px;
-      display:flex;
-      justify-content:space-between;
-      gap: 12px;
-      align-items:flex-start;
-    }
-    .banner strong { display:block; margin-bottom:4px; }
-    .banner p { margin:0; color:var(--muted); font-size:14px; }
-
-    .layout { display:grid; grid-template-columns: 1.5fr .9fr; gap: 16px; align-items:start; }
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(16px);
-    }
-    .card .card-hd { padding: 16px 16px 0; display:flex; justify-content:space-between; gap:12px; align-items:flex-start; }
-    .card .card-bd { padding: 16px; }
-    .card-title { margin:0; font-size:17px; font-weight:800; }
-    .card-sub { color:var(--muted); font-size:13px; margin-top:4px; }
-
-    .tabs { display:flex; gap:8px; flex-wrap:wrap; margin-top: 14px; }
-    .tab {
-      border: 1px solid var(--line); background: var(--surface-2); color: var(--text);
-      border-radius: 999px; padding: 10px 14px; font-weight:700;
-    }
-    .tab.active { background: rgba(45,212,191,0.14); border-color: rgba(45,212,191,0.35); color: var(--primary-2); }
-
-    .section { display:none; }
-    .section.active { display:block; }
-
-    .grid { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
-    .item {
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 14px;
-      background: var(--surface-2);
-    }
-    .item h4 { margin:0 0 6px; font-size: 15px; }
-    .meta { color:var(--muted); font-size:13px; line-height:1.45; }
-    .row { display:flex; gap: 10px; flex-wrap:wrap; }
-    .small { font-size:12px; color:var(--muted); }
-    .status {
-      display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px;
-      font-size:12px; font-weight:700;
-    }
-    .status.good { background: var(--success-soft); color: var(--success); }
-    .status.warn { background: var(--warning-soft); color: var(--warning); }
-    .status.bad { background: var(--danger-soft); color: var(--danger); }
-
-    .statbar { display:grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-top: 12px; }
-    .stat {
-      padding: 12px; border: 1px solid var(--line); border-radius: 18px; background: var(--surface-2);
-    }
-    .stat strong { display:block; font-size: 20px; }
-    .stat span { color: var(--muted); font-size:12px; }
-
-    .form { display:grid; gap: 12px; }
+    .topbar { position: sticky; top: 0; z-index: 10; padding: 12px 0 14px; backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); background: linear-gradient(to bottom, color-mix(in srgb, var(--bg) 90%, transparent), color-mix(in srgb, var(--bg) 65%, transparent)); }
+    .topbar-inner { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 14px; border:1px solid var(--line); border-radius:24px; background:var(--surface); box-shadow:var(--shadow); }
+    .brand { display:flex; align-items:center; gap:12px; }
+    .logo { width:40px; height:40px; border-radius:14px; display:grid; place-items:center; background:linear-gradient(135deg, var(--primary), #60a5fa); color:white; font-weight:800; }
+    .brand h1 { margin:0; font-size:1rem; }
+    .brand p { margin:2px 0 0; color:var(--muted); font-size:0.8rem; }
+    .top-actions { display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+    .icon-btn { width:42px; height:42px; border-radius:14px; background:var(--surface-2); color:var(--text); border:1px solid var(--line); display:grid; place-items:center; }
+    .pill-btn { border-radius:999px; padding:10px 14px; background:var(--surface); color:var(--text); border:1px solid var(--line); box-shadow:var(--shadow); display:inline-flex; align-items:center; gap:8px; font-weight:700; }
+    .pill-btn.primary { background:linear-gradient(135deg, var(--primary), var(--primary-2)); color:white; border-color:transparent; }
+    .view { display:none; padding:10px 0 18px; }
+    .view.active { display:block; }
+    .stack { display:grid; gap:14px; }
+    .hero { padding:18px; border-radius:28px; background:linear-gradient(180deg, color-mix(in srgb, var(--surface-2) 92%, white), var(--surface)); border:1px solid var(--line); box-shadow:var(--shadow); }
+    .hero h2 { margin:0 0 8px; font-size:1.35rem; line-height:1.15; }
+    .hero p { margin:0; color:var(--muted); }
+    .status-row { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:16px; }
+    .stat { border-radius:20px; background:var(--surface-2); border:1px solid var(--line); padding:12px; min-height:88px; display:flex; flex-direction:column; justify-content:space-between; }
+    .stat strong { font-size:1.25rem; }
+    .stat span { color:var(--muted); font-size:0.82rem; }
+    .card { border-radius:24px; background:var(--surface); border:1px solid var(--line); box-shadow:var(--shadow); padding:16px; }
+    .card h3 { margin:0 0 6px; font-size:1rem; }
+    .sub { color:var(--muted); font-size:0.88rem; margin:0; }
+    .row { display:flex; gap:10px; }
+    .row.wrap { flex-wrap:wrap; }
+    .between { display:flex; justify-content:space-between; gap:10px; align-items:center; }
+    .btn { min-height:46px; padding:0 16px; border-radius:15px; font-weight:700; letter-spacing:0.01em; display:inline-flex; align-items:center; justify-content:center; gap:8px; transition: transform 120ms ease, opacity 120ms ease, background 120ms ease; }
+    .btn:active { transform:scale(0.98); }
+    .btn-primary { background:linear-gradient(180deg, var(--primary), var(--primary-2)); color:white; }
+    .btn-secondary { background:var(--surface-2); color:var(--text); border:1px solid var(--line); }
+    .btn-danger { background:var(--danger-soft); color:var(--danger); border:1px solid color-mix(in srgb, var(--danger) 24%, var(--line)); }
+    .btn.small { min-height:38px; padding:0 12px; border-radius:12px; font-size:0.9rem; }
+    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
     .field { display:grid; gap:6px; }
-    .field label { font-size:12px; font-weight:700; color:var(--muted); }
-    .field input, .field textarea, .field select {
-      border: 1px solid var(--line); border-radius: 16px; padding: 12px 14px;
-      background: var(--surface-2); color: var(--text);
-    }
-    .field textarea { min-height: 100px; resize: vertical; }
-
-    .footer-tabs {
-      position: fixed; left: 50%; transform: translateX(-50%);
-      bottom: 10px; width: min(860px, calc(100% - 16px));
-      background: rgba(255,255,255,0.84);
-      border: 1px solid var(--line); border-radius: 22px;
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(18px);
-      display:grid; grid-template-columns: repeat(4,1fr);
-      overflow:hidden;
-      z-index: 20;
-    }
-    [data-theme="dark"] .footer-tabs { background: rgba(15,23,42,0.84); }
-    .footer-tabs button {
-      background: transparent;
-      padding: 12px 8px;
-      color: var(--muted);
-      font-weight: 800;
-      border: 0;
-    }
-    .footer-tabs button.active {
-      color: var(--primary-2);
-      background: rgba(45,212,191,0.12);
-    }
-
+    .field label { font-size:0.82rem; color:var(--muted); font-weight:700; }
+    .input, select, textarea { width:100%; border:1px solid var(--line); background:var(--surface-2); color:var(--text); border-radius:14px; padding:13px 14px; min-height:46px; outline:none; }
+    textarea { min-height:96px; resize:vertical; }
+    .tag { display:inline-flex; align-items:center; min-height:28px; padding:0 10px; border-radius:999px; font-size:0.76rem; font-weight:800; letter-spacing:0.03em; background: color-mix(in srgb, var(--primary) 14%, var(--surface-2)); color:var(--primary); }
+    .list { display:grid; gap:10px; }
+    .item { border:1px solid var(--line); border-radius:18px; background:var(--surface-2); padding:14px; }
+    .item-title { font-weight:800; margin:0 0 4px; }
+    .meta { color:var(--muted); font-size:0.84rem; }
+    .qty { font-size:1.5rem; font-weight:800; }
+    .adjust-grid { display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; margin-top:10px; }
+    .history-entry { padding:12px 0; border-bottom:1px solid var(--line); }
+    .history-entry:last-child { border-bottom:0; }
+    .tabbar-wrap { position:fixed; left:0; right:0; bottom:0; display:flex; justify-content:center; z-index:20; pointer-events:none; padding:10px 14px calc(env(safe-area-inset-bottom) + 10px); }
+    .tabbar { pointer-events:auto; width:min(92vw, 760px); display:grid; grid-template-columns:repeat(5, 1fr); gap:8px; padding:10px; border-radius:28px; background: color-mix(in srgb, var(--surface) 92%, transparent); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); border:1px solid var(--line); box-shadow:var(--shadow); }
+    .tab { min-height:60px; border-radius:18px; background:transparent; color:var(--muted); display:grid; place-items:center; gap:2px; padding:6px; font-size:0.74rem; font-weight:700; }
+    .tab .ico { font-size:1.1rem; }
+    .tab.active { color:var(--primary); background: color-mix(in srgb, var(--primary) 14%, var(--surface-2)); }
+    .empty { color:var(--muted); text-align:center; padding:18px 10px; }
     .hidden { display:none !important; }
-    @media (max-width: 760px) {
-      .layout { grid-template-columns: 1fr; }
-      .grid { grid-template-columns: 1fr; }
-      .topbar-row { flex-direction:column; }
-      .actions { justify-content:flex-start; }
-      .statbar { grid-template-columns: 1fr; }
+    @media (max-width:640px) {
+      .status-row { grid-template-columns:1fr; }
+      .grid-2 { grid-template-columns:1fr; }
+      .topbar-inner { align-items:flex-start; }
+      .brand { align-items:flex-start; }
+      .adjust-grid { grid-template-columns:repeat(2,1fr); }
+      .tab { min-height:58px; }
+      .tab .label { font-size:0.68rem; }
     }
   </style>
 </head>
 <body>
   <div class="app">
     <header class="topbar">
-      <div class="topbar-row">
-        <div>
-          <div class="eyebrow">Dialysis Agent</div>
-          <h1 class="title">Dialysis Agent Companion</h1>
-          <p class="subtitle">Track treatments, readings, supplies, notes, and exportable backups in one iPhone-friendly page.</p>
+      <div class="topbar-inner">
+        <div class="brand">
+          <div class="logo">DA</div>
+          <div>
+            <h1>Dialysis Agent Companion</h1>
+            <p>Treatments, inventory, notes, and quick logs</p>
+          </div>
         </div>
-        <div class="actions">
-          <button class="pill-btn" id="themeBtn" type="button">Theme</button>
-          <button class="pill-btn" id="exportBtn" type="button">Export JSON</button>
-          <label class="pill-btn primary" for="importFile">Import JSON</label>
+        <div class="top-actions">
+          <button class="icon-btn" id="themeToggle" aria-label="Toggle theme">◐</button>
+          <button class="pill-btn" id="exportBtn" type="button">Export</button>
+          <label class="pill-btn primary" for="importFile">Import</label>
           <input id="importFile" type="file" accept="application/json" class="hidden" />
         </div>
       </div>
-
-      <div class="banner">
-        <div>
-          <strong>Built for quick daily use</strong>
-          <p>Use the tabs below for pre-treatment, post-treatment, supplies, and history.</p>
-        </div>
-        <span class="status good" id="saveState">Saved locally</span>
-      </div>
     </header>
 
-    <main class="layout">
-      <section class="card">
-        <div class="card-hd">
-          <div>
-            <h2 class="card-title">Dashboard</h2>
-            <div class="card-sub">A quick snapshot of your dialysis workflow.</div>
+    <main>
+      <section id="homeView" class="view active stack">
+        <div class="hero">
+          <h2>One place for dialysis logs and supplies</h2>
+          <p>Track pre-treatment and post-treatment readings, keep an inventory list, and save everything locally on your device.</p>
+          <div class="status-row">
+            <div class="stat"><strong id="countTreatments">0</strong><span>Treatments</span></div>
+            <div class="stat"><strong id="countItems">0</strong><span>Inventory items</span></div>
+            <div class="stat"><strong id="countNotes">0</strong><span>Notes</span></div>
           </div>
-          <span class="status good" id="dashCount">0 entries</span>
         </div>
-        <div class="card-bd">
-          <div class="statbar">
-            <div class="stat"><strong id="statTreatments">0</strong><span>Treatments logged</span></div>
-            <div class="stat"><strong id="statSupplies">0</strong><span>Supply items</span></div>
-            <div class="stat"><strong id="statNotes">0</strong><span>Notes</span></div>
-          </div>
-
-          <div class="tabs">
-            <button class="tab active" data-tab="treatments">Treatments</button>
-            <button class="tab" data-tab="supplies">Supplies</button>
-            <button class="tab" data-tab="notes">Notes</button>
-            <button class="tab" data-tab="history">History</button>
-          </div>
-
-          <div id="treatments" class="section active" style="margin-top:16px;">
-            <div class="grid" id="treatmentList"></div>
-            <div class="row" style="margin-top:14px;">
-              <button class="pill-btn primary" id="addTreatmentBtn" type="button">+ Add treatment</button>
+        <div class="card">
+          <div class="between">
+            <div>
+              <h3>Quick add</h3>
+              <p class="sub">Save a treatment, inventory item, or note in one tap.</p>
             </div>
+            <span class="tag">Local only</span>
           </div>
-
-          <div id="supplies" class="section" style="margin-top:16px;">
-            <div class="grid" id="supplyList"></div>
-            <div class="row" style="margin-top:14px;">
-              <button class="pill-btn primary" id="addSupplyBtn" type="button">+ Add supply</button>
-            </div>
-          </div>
-
-          <div id="notes" class="section" style="margin-top:16px;">
-            <div class="grid" id="noteList"></div>
-            <div class="row" style="margin-top:14px;">
-              <button class="pill-btn primary" id="addNoteBtn" type="button">+ Add note</button>
-            </div>
-          </div>
-
-          <div id="history" class="section" style="margin-top:16px;">
-            <div class="grid" id="historyList"></div>
+          <div class="row wrap" style="margin-top:12px;">
+            <button class="btn btn-secondary" data-quick="treatment">+ Treatment</button>
+            <button class="btn btn-secondary" data-quick="inventory">+ Inventory</button>
+            <button class="btn btn-secondary" data-quick="note">+ Note</button>
           </div>
         </div>
       </section>
 
-      <aside class="card">
-        <div class="card-hd">
-          <div>
-            <h2 class="card-title">Quick entry</h2>
-            <div class="card-sub">Fast logging for common fields.</div>
+      <section id="treatmentsView" class="view stack">
+        <div class="card">
+          <div class="between">
+            <div>
+              <h3>Treatment log</h3>
+              <p class="sub">Pre-treatment and post-treatment entries.</p>
+            </div>
+            <button class="btn btn-primary" id="addTreatmentBtn">+ Add</button>
           </div>
+          <div id="treatmentsList" class="list" style="margin-top:14px;"></div>
         </div>
-        <div class="card-bd">
-          <form class="form" id="quickForm">
-            <div class="field">
-              <label for="quickType">Type</label>
-              <select id="quickType">
-                <option value="treatment">Treatment</option>
-                <option value="supply">Supply</option>
-                <option value="note">Note</option>
-              </select>
+      </section>
+
+      <section id="inventoryView" class="view stack">
+        <div class="card">
+          <div class="between">
+            <div>
+              <h3>Inventory</h3>
+              <p class="sub">Track supplies, adjust quantity, and mark items ordered.</p>
             </div>
-            <div class="field">
-              <label for="quickTitle">Title</label>
-              <input id="quickTitle" placeholder="Example: Pre-treatment" />
-            </div>
-            <div class="field">
-              <label for="quickDetail">Details</label>
-              <textarea id="quickDetail" placeholder="Enter reading, amount, note, or anything important."></textarea>
-            </div>
-            <button class="pill-btn primary" type="submit">Save entry</button>
-          </form>
+            <button class="btn btn-primary" id="addItemBtn">+ Add item</button>
+          </div>
+          <div id="inventoryList" class="list" style="margin-top:14px;"></div>
         </div>
-      </aside>
+      </section>
+
+      <section id="notesView" class="view stack">
+        <div class="card">
+          <div class="between">
+            <div>
+              <h3>Notes</h3>
+              <p class="sub">Important reminders, clinic details, and anything to remember.</p>
+            </div>
+            <button class="btn btn-primary" id="addNoteBtn">+ Add note</button>
+          </div>
+          <div id="notesList" class="list" style="margin-top:14px;"></div>
+        </div>
+      </section>
+
+      <section id="historyView" class="view stack">
+        <div class="card">
+          <div class="between">
+            <div>
+              <h3>History</h3>
+              <p class="sub">Recent changes saved locally.</p>
+            </div>
+          </div>
+          <div id="historyList" style="margin-top:14px;"></div>
+        </div>
+      </section>
     </main>
   </div>
 
-  <nav class="footer-tabs">
-    <button class="active" data-tab="treatments">Treatments</button>
-    <button data-tab="supplies">Supplies</button>
-    <button data-tab="notes">Notes</button>
-    <button data-tab="history">History</button>
+  <nav class="tabbar" aria-label="Main navigation">
+    <button class="tab active" data-tab="home"><div class="ico">⌂</div><div class="label">Home</div></button>
+    <button class="tab" data-tab="treatments"><div class="ico">▣</div><div class="label">Treatments</div></button>
+    <button class="tab" data-tab="inventory"><div class="ico">◫</div><div class="label">Inventory</div></button>
+    <button class="tab" data-tab="notes"><div class="ico">✎</div><div class="label">Notes</div></button>
+    <button class="tab" data-tab="history"><div class="ico">≡</div><div class="label">History</div></button>
   </nav>
 
   <script>
-    const KEY = 'dialysis-agent-companion-v1';
+    const KEY = 'dialysis-agent-companion-v2';
     const $ = id => document.getElementById(id);
-    const state = load() || {
-      theme: 'light',
-      activeTab: 'treatments',
-      treatments: [],
-      supplies: [],
-      notes: [],
-      history: []
-    };
+    const state = load() || { theme:'light', tab:'home', treatments:[], inventory:[], notes:[], history:[] };
 
-    function load() {
-      try { return JSON.parse(localStorage.getItem(KEY)); } catch { return null; }
+    function load(){ try { return JSON.parse(localStorage.getItem(KEY)); } catch { return null; } }
+    function save(){ localStorage.setItem(KEY, JSON.stringify(state)); }
+    function log(text){ state.history.unshift({ at:new Date().toISOString(), text }); state.history = state.history.slice(0,50); save(); }
+    function setTheme(theme){ state.theme = theme; document.documentElement.dataset.theme = theme; save(); }
+    function setTab(tab){ state.tab = tab; save(); render(); }
+    function fmt(iso){ return new Date(iso).toLocaleString(); }
+    function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+    function n(v){ return Number(v) || 0; }
+    function escapeHtml(s){ return String(s ?? '').replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+
+    function renderCounts(){
+      $('countTreatments').textContent = state.treatments.length;
+      $('countItems').textContent = state.inventory.length;
+      $('countNotes').textContent = state.notes.length;
     }
 
-    function save() {
-      localStorage.setItem(KEY, JSON.stringify(state));
-      $('saveState').textContent = 'Saved locally';
+    function renderViews(){
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      const map={home:$('homeView'), treatments:$('treatmentsView'), inventory:$('inventoryView'), notes:$('notesView'), history:$('historyView')};
+      (map[state.tab] || map.home).classList.add('active');
+      document.querySelectorAll('.tab').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === state.tab));
     }
 
-    function touch(msg) {
-      state.history.unshift({ at: new Date().toISOString(), text: msg });
-      state.history = state.history.slice(0, 30);
-      save();
-      render();
-    }
-
-    function setTheme(theme) {
-      state.theme = theme;
-      document.documentElement.dataset.theme = theme;
-      save();
-    }
-
-    function fmtTime(iso) {
-      return new Date(iso).toLocaleString();
-    }
-
-    function entryCard(title, details, meta, status) {
-      const div = document.createElement('div');
-      div.className = 'item';
-      div.innerHTML = `
-        <h4>${title}</h4>
-        <div class="meta">${details}</div>
-        <div class="row" style="margin-top:10px;justify-content:space-between;align-items:center;">
-          <span class="status ${status}">${meta}</span>
-        </div>
-      `;
+    function treatmentEntry(item){
+      const div=document.createElement('div');
+      div.className='item';
+      div.innerHTML=`<div class="between"><div><div class="item-title">${escapeHtml(item.title || 'Treatment')}</div><div class="meta">${escapeHtml(item.detail || '')}</div></div><span class="tag">${fmt(item.at)}</span></div><div class="row wrap" style="margin-top:10px;"><button class="btn small btn-secondary" data-edit="treatment" data-id="${item.id}">Edit</button><button class="btn small btn-danger" data-del="treatment" data-id="${item.id}">Delete</button></div>`;
       return div;
     }
 
-    function render() {
-      document.documentElement.dataset.theme = state.theme || 'light';
-
-      $('statTreatments').textContent = state.treatments.length;
-      $('statSupplies').textContent = state.supplies.length;
-      $('statNotes').textContent = state.notes.length;
-      $('dashCount').textContent = `${state.history.length} entries`;
-
-      document.querySelectorAll('.tab, .footer-tabs button').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.tab === state.activeTab);
-      });
-
-      document.querySelectorAll('.section').forEach(sec => {
-        sec.classList.toggle('active', sec.id === state.activeTab);
-      });
-
-      $('treatmentList').innerHTML = '';
-      state.treatments.slice().reverse().forEach((item, idx) => {
-        const card = entryCard(item.title, item.detail || 'No details.', fmtTime(item.at), 'good');
-        $('treatmentList').appendChild(card);
-      });
-      if (!state.treatments.length) $('treatmentList').innerHTML = '<div class="small">No treatments logged yet.</div>';
-
-      $('supplyList').innerHTML = '';
-      state.supplies.slice().reverse().forEach(item => {
-        const card = entryCard(item.title, item.detail || 'No details.', fmtTime(item.at), 'warn');
-        $('supplyList').appendChild(card);
-      });
-      if (!state.supplies.length) $('supplyList').innerHTML = '<div class="small">No supplies logged yet.</div>';
-
-      $('noteList').innerHTML = '';
-      state.notes.slice().reverse().forEach(item => {
-        const card = entryCard(item.title, item.detail || 'No details.', fmtTime(item.at), 'bad');
-        $('noteList').appendChild(card);
-      });
-      if (!state.notes.length) $('noteList').innerHTML = '<div class="small">No notes yet.</div>';
-
-      $('historyList').innerHTML = '';
-      state.history.slice().reverse().forEach(item => {
-        const card = entryCard(item.text, '', fmtTime(item.at), 'good');
-        $('historyList').appendChild(card);
-      });
-      if (!state.history.length) $('historyList').innerHTML = '<div class="small">No history yet.</div>';
+    function inventoryEntry(item){
+      const low = n(item.qty) <= n(item.reorderPoint || 0);
+      const div=document.createElement('div');
+      div.className='item';
+      div.innerHTML=`<div class="between"><div><div class="item-title">${escapeHtml(item.title || 'Item')}</div><div class="meta">${escapeHtml(item.detail || '')}</div></div><span class="status ${item.ordered ? 'warn' : (low ? 'bad' : 'good')}">${item.ordered ? 'Ordered' : (low ? 'Low' : 'OK')}</span></div><div class="between" style="margin-top:10px;"><div class="qty">${n(item.qty)}</div><div class="meta">Reorder at ${n(item.reorderPoint || 0)}</div></div><div class="adjust-grid"><button class="btn small btn-secondary" data-adjust="-5" data-id="${item.id}">-5</button><button class="btn small btn-secondary" data-adjust="-1" data-id="${item.id}">-1</button><button class="btn small btn-secondary" data-adjust="1" data-id="${item.id}">+1</button><button class="btn small btn-secondary" data-adjust="5" data-id="${item.id}">+5</button></div><div class="row wrap" style="margin-top:10px;"><button class="btn small btn-secondary" data-order="${item.id}">${item.ordered ? 'Unmark ordered' : 'Mark ordered'}</button><button class="btn small btn-secondary" data-edit="inventory" data-id="${item.id}">Edit</button><button class="btn small btn-danger" data-del="inventory" data-id="${item.id}">Delete</button></div>`;
+      return div;
     }
 
-    function addEntry(type, title, detail) {
-      const item = { title, detail, at: new Date().toISOString() };
-      if (type === 'treatment') state.treatments.push(item);
-      if (type === 'supply') state.supplies.push(item);
-      if (type === 'note') state.notes.push(item);
-      touch(`Added ${type}: ${title}`);
+    function noteEntry(item){
+      const div=document.createElement('div');
+      div.className='item';
+      div.innerHTML=`<div class="between"><div><div class="item-title">${escapeHtml(item.title || 'Note')}</div><div class="meta">${escapeHtml(item.detail || '')}</div></div><span class="tag">${fmt(item.at)}</span></div><div class="row wrap" style="margin-top:10px;"><button class="btn small btn-secondary" data-edit="note" data-id="${item.id}">Edit</button><button class="btn small btn-danger" data-del="note" data-id="${item.id}">Delete</button></div>`;
+      return div;
     }
 
-    document.querySelectorAll('.tab, .footer-tabs button').forEach(btn => {
-      btn.addEventListener('click', () => {
-        state.activeTab = btn.dataset.tab;
-        save();
-        render();
-      });
-    });
+    function historyEntry(item){
+      const div=document.createElement('div');
+      div.className='history-entry';
+      div.innerHTML=`<div class="meta">${fmt(item.at)}</div><div>${escapeHtml(item.text)}</div>`;
+      return div;
+    }
 
-    $('themeBtn').addEventListener('click', () => {
-      setTheme((state.theme || 'light') === 'light' ? 'dark' : 'light');
+    function addTreatment(){
+      const title=prompt('Treatment title?'); if(!title) return;
+      const detail=prompt('Details?','') || '';
+      state.treatments.unshift({id:uid(), title, detail, at:new Date().toISOString()});
+      log(`Added treatment: ${title}`);
       render();
-    });
+    }
 
-    $('addTreatmentBtn').addEventListener('click', () => {
-      const title = prompt('Treatment title?');
-      if (!title) return;
-      const detail = prompt('Details?', '');
-      addEntry('treatment', title, detail || '');
-    });
+    function addInventoryItem(){
+      const title=prompt('Item name?'); if(!title) return;
+      const detail=prompt('Details?','') || '';
+      const qty=prompt('Quantity?','0');
+      const reorderPoint=prompt('Reorder point?','0');
+      state.inventory.unshift({id:uid(), title, detail, qty:n(qty), reorderPoint:n(reorderPoint), ordered:false, at:new Date().toISOString()});
+      log(`Added inventory item: ${title}`);
+      render();
+    }
 
-    $('addSupplyBtn').addEventListener('click', () => {
-      const title = prompt('Supply title?');
-      if (!title) return;
-      const detail = prompt('Details?', '');
-      addEntry('supply', title, detail || '');
-    });
+    function addNote(){
+      const title=prompt('Note title?'); if(!title) return;
+      const detail=prompt('Note text?','') || '';
+      state.notes.unshift({id:uid(), title, detail, at:new Date().toISOString()});
+      log(`Added note: ${title}`);
+      render();
+    }
 
-    $('addNoteBtn').addEventListener('click', () => {
-      const title = prompt('Note title?');
-      if (!title) return;
-      const detail = prompt('Note details?', '');
-      addEntry('note', title, detail || '');
-    });
+    function editByType(type, itemId){
+      const key = type === 'inventory' ? 'inventory' : type + 's';
+      const item = state[key].find(x => x.id === itemId);
+      if (!item) return;
+      const title = prompt('Title', item.title || '');
+      if (title === null) return;
+      const detail = prompt('Details', item.detail || '') || '';
+      item.title = title;
+      item.detail = detail;
+      if (type === 'inventory') {
+        item.qty = n(prompt('Quantity', item.qty ?? 0));
+        item.reorderPoint = n(prompt('Reorder point', item.reorderPoint ?? 0));
+      }
+      item.at = new Date().toISOString();
+      log(`Edited ${type}: ${title}`);
+      render();
+    }
 
-    $('quickForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const type = $('quickType').value;
-      const title = $('quickTitle').value.trim();
-      const detail = $('quickDetail').value.trim();
-      if (!title) return;
-      addEntry(type, title, detail);
-      $('quickTitle').value = '';
-      $('quickDetail').value = '';
-    });
+    function deleteByType(type, itemId){
+      const key = type === 'inventory' ? 'inventory' : type + 's';
+      const list = state[key];
+      const idx = list.findIndex(x => x.id === itemId);
+      if (idx < 0) return;
+      const name = list[idx].title || type;
+      if (!confirm(`Delete ${name}?`)) return;
+      list.splice(idx,1);
+      log(`Deleted ${type}: ${name}`);
+      render();
+    }
 
-    $('exportBtn').addEventListener('click', () => {
-      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'dialysis-agent-companion.json';
-      a.click();
-      URL.revokeObjectURL(url);
-    });
+    function normalizeImportedData(data){
+      const out = { theme: data.theme || 'light', tab: data.tab || data.activeTab || 'home', treatments: [], inventory: [], notes: [], history: Array.isArray(data.history) ? data.history : [] };
+      if (Array.isArray(data.treatments)) out.treatments = data.treatments;
+      if (Array.isArray(data.notes)) out.notes = data.notes;
+      if (Array.isArray(data.inventory)) {
+        out.inventory = data.inventory;
+      } else if (Array.isArray(data.items)) {
+        out.inventory = data.items.map(item => ({
+          id: item.id || uid(),
+          title: item.name || 'Item',
+          detail: [item.category, item.unit, item.expires ? `Expires: ${item.expires}` : '', item.status ? `Status: ${item.status}` : '', item.notes || ''].filter(Boolean).join(' • '),
+          qty: n(item.onHand),
+          reorderPoint: n(item.reorderPoint),
+          ordered: String(item.status || '').toLowerCase().includes('order'),
+          at: new Date().toISOString()
+        }));
+      }
+      return out;
+    }
 
-    $('importFile').addEventListener('change', async (e) => {
-      const file = e.target.files[0];
+    async function importFromFile(file){
       if (!file) return;
       try {
         const data = JSON.parse(await file.text());
         if (!data || typeof data !== 'object') throw new Error('Invalid file');
-        state.theme = data.theme || 'light';
-        state.activeTab = data.activeTab || 'treatments';
-        state.treatments = Array.isArray(data.treatments) ? data.treatments : [];
-        state.supplies = Array.isArray(data.supplies) ? data.supplies : [];
-        state.notes = Array.isArray(data.notes) ? data.notes : [];
-        state.history = Array.isArray(data.history) ? data.history : [];
+        const imported = normalizeImportedData(data);
+        state.theme = imported.theme;
+        state.tab = imported.tab;
+        state.treatments = imported.treatments;
+        state.inventory = imported.inventory;
+        state.notes = imported.notes;
+        state.history = imported.history;
+        log(`Imported backup: ${file.name}`);
         save();
         render();
       } catch {
         alert('That file could not be imported.');
       }
-    });
+    }
 
+    function render(){
+      document.documentElement.dataset.theme = state.theme || 'light';
+      renderCounts();
+      renderViews();
+
+      $('treatmentsList').innerHTML='';
+      if (!state.treatments.length) $('treatmentsList').innerHTML='<div class="empty">No treatments logged yet.</div>';
+      state.treatments.forEach(item => $('treatmentsList').appendChild(treatmentEntry(item)));
+
+      $('inventoryList').innerHTML='';
+      if (!state.inventory.length) $('inventoryList').innerHTML='<div class="empty">No inventory items yet.</div>';
+      state.inventory.forEach(item => $('inventoryList').appendChild(inventoryEntry(item)));
+
+      $('notesList').innerHTML='';
+      if (!state.notes.length) $('notesList').innerHTML='<div class="empty">No notes yet.</div>';
+      state.notes.forEach(item => $('notesList').appendChild(noteEntry(item)));
+
+      $('historyList').innerHTML='';
+      if (!state.history.length) $('historyList').innerHTML='<div class="empty">No history yet.</div>';
+      state.history.forEach(item => $('historyList').appendChild(historyEntry(item)));
+
+      save();
+    }
+
+    document.querySelectorAll('[data-tab]').forEach(btn => btn.addEventListener('click', () => setTab(btn.dataset.tab)));
+    $('themeToggle').addEventListener('click', () => setTheme((state.theme || 'light') === 'light' ? 'dark' : 'light'));
+    $('addTreatmentBtn').addEventListener('click', addTreatment);
+    $('addItemBtn').addEventListener('click', addInventoryItem);
+    $('addNoteBtn').addEventListener('click', addNote);
+    document.querySelectorAll('[data-quick]').forEach(btn => btn.addEventListener('click', () => {
+      const t=btn.dataset.quick;
+      if (t === 'treatment') addTreatment();
+      if (t === 'inventory') addInventoryItem();
+      if (t === 'note') addNote();
+    }));
+    document.body.addEventListener('click', (e) => {
+      const edit=e.target.closest('[data-edit]');
+      const del=e.target.closest('[data-del]');
+      const adjust=e.target.closest('[data-adjust]');
+      const order=e.target.closest('[data-order]');
+      if (edit) editByType(edit.dataset.edit, edit.dataset.id);
+      if (del) deleteByType(del.dataset.del, del.dataset.id);
+      if (adjust) {
+        const item=state.inventory.find(x => x.id === adjust.dataset.id);
+        if (!item) return;
+        item.qty = n(item.qty) + n(adjust.dataset.adjust);
+        log(`Adjusted ${item.title}: ${adjust.dataset.adjust}`);
+        render();
+      }
+      if (order) {
+        const item=state.inventory.find(x => x.id === order.dataset.id);
+        if (!item) return;
+        item.ordered = !item.ordered;
+        log(`${item.ordered ? 'Marked' : 'Unmarked'} ordered: ${item.title}`);
+        render();
+      }
+    });
+    $('exportBtn').addEventListener('click', () => {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type:'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'dialysis-agent-companion.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+    $('importFile').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      await importFromFile(file);
+      e.target.value = '';
+    });
     setTheme(state.theme || 'light');
+    setTab(state.tab || 'home');
     render();
   </script>
 </body>
