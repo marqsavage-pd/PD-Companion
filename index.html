@@ -1,3 +1,6 @@
+Absolutely — here is the updated HTML to paste into `index.html`. It includes the stronger history cleanup so invalid date rows should no longer show.
+
+```html
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
@@ -273,9 +276,10 @@
     function historyEntry(item){
       const div=document.createElement('div');
       div.className='history-entry';
+      const text = item && typeof item.text === 'string' ? item.text : '';
       const at = item && item.at ? new Date(item.at) : null;
       const when = at && !isNaN(at.getTime()) ? at.toLocaleString() : '';
-      div.innerHTML=`${when ? `<div class="meta">${when}</div>` : ''}<div>${escapeHtml(item.text || '')}</div>`;
+      div.innerHTML=`${when ? `<div class="meta">${when}</div>` : ''}<div>${escapeHtml(text)}</div>`;
       return div;
     }
 
@@ -367,7 +371,9 @@
         state.inventory = imported.inventory;
         state.notes = imported.notes;
         state.history = imported.history;
+        state.history = state.history.filter(h => h && h.at && h.text);
         log(`Imported backup: ${file.name}`);
+        state.history = state.history.filter(h => h && h.at && h.text);
         save();
         render();
       } catch {
@@ -451,3 +457,4 @@
   </script>
 </body>
 </html>
+
