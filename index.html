@@ -212,14 +212,14 @@
     </main>
   </div>
 
-  <nav class="tabbar" aria-label="Main navigation">
-    <button class="tab active" data-tab="home"><div class="ico">⌂</div><div class="label">Home</div></button>
-    <button class="tab" data-tab="treatments"><div class="ico">▣</div><div class="label">Treatments</div></button>
-    <button class="tab" data-tab="inventory"><div class="ico">◫</div><div class="label">Inventory</div></button>
-    <button class="tab" data-tab="notes"><div class="ico">✎</div><div class="label">Notes</div></button>
-    <button class="tab" data-tab="history"><div class="ico">≡</div><div class="label">History</div></button>
+    <nav class="tabbar" aria-label="Main navigation" id="tabbar">
+    <button class="tab active" data-tab="home" type="button"><div class="ico">⌂</div><div class="label">Home</div></button>
+    <button class="tab" data-tab="treatments" type="button"><div class="ico">▣</div><div class="label">Treatments</div></button>
+    <button class="tab" data-tab="inventory" type="button"><div class="ico">◫</div><div class="label">Inventory</div></button>
+    <button class="tab" data-tab="notes" type="button"><div class="ico">✎</div><div class="label">Notes</div></button>
+    <button class="tab" data-tab="history" type="button"><div class="ico">≡</div><div class="label">History</div></button>
   </nav>
-
+  
   <script>
     const KEY = 'dialysis-agent-companion-v2';
     const $ = id => document.getElementById(id);
