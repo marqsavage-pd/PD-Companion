@@ -297,7 +297,6 @@
     $('importFile').addEventListener('change', async (e) => { const file = e.target.files[0]; await importFromFile(file); e.target.value = ''; });
     setTheme(state.theme || 'light');
     setTab(state.tab || 'home');
-    render();  <script>
     const KEY = 'dialysis-agent-companion-v2';
     const $ = id => document.getElementById(id);
     const state = load() || { theme:'light', tab:'home', treatments:[], inventory:[], notes:[], history:[] };
