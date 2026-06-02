@@ -227,7 +227,7 @@
 
     function load(){ try { return JSON.parse(localStorage.getItem(KEY)); } catch { return null; } }
     function save(){ localStorage.setItem(KEY, JSON.stringify(state)); }
-    function log(text){ state.history.unshift({ at:new Date().toISOString(), text }); state.history = state.history.slice(0,50); save(); }
+    function log(text){ state.history.unshift({ at:new Date().toISOString(), text }); state.history = state.history.filter(h => h && h.at && h.text); state.history = state.history.slice(0,50); save(); }
     function setTheme(theme){ state.theme = theme; document.documentElement.dataset.theme = theme; save(); }
     function setTab(tab){ state.tab = tab; save(); render(); }
     function fmt(iso){ return new Date(iso).toLocaleString(); }
@@ -273,7 +273,9 @@
     function historyEntry(item){
       const div=document.createElement('div');
       div.className='history-entry';
-      div.innerHTML=`<div class="meta">${fmt(item.at)}</div><div>${escapeHtml(item.text)}</div>`;
+      const at = item && item.at ? new Date(item.at) : null;
+      const when = at && !isNaN(at.getTime()) ? at.toLocaleString() : '';
+      div.innerHTML=`${when ? `<div class="meta">${when}</div>` : ''}<div>${escapeHtml(item.text || '')}</div>`;
       return div;
     }
 
@@ -334,7 +336,7 @@
     }
 
     function normalizeImportedData(data){
-      const out = { theme: data.theme || 'light', tab: data.tab || data.activeTab || 'home', treatments: [], inventory: [], notes: [], history: Array.isArray(data.history) ? data.history : [] };
+      const out = { theme: data.theme || 'light', tab: data.tab || data.activeTab || 'home', treatments: [], inventory: [], notes: [], history: Array.isArray(data.history) ? data.history.filter(h => h && h.at && h.text) : [] };
       if (Array.isArray(data.treatments)) out.treatments = data.treatments;
       if (Array.isArray(data.notes)) out.notes = data.notes;
       if (Array.isArray(data.inventory)) {
