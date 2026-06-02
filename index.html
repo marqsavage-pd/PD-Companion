@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>PD Supplies</title>
+  <style>
+    :root { --bg:#f6f7fb; --card:#ffffff; --text:#162033; --muted:#667085; --line:#e6e8ef; --blue:#2563eb; --blue2:#60a5fa; --green:#10b981; --orange:#f59e0b; --red:#ef4444; --shadow:0 10px 30px rgba(15,23,42,.08); }
+    [data-theme="dark"] { --bg:#0f172a; --card:#111827; --text:#e5e7eb; --muted:#94a3b8; --line:#243047; --shadow:0 10px 30px rgba(0,0,0,.3); }
+    *{box-sizing:border-box} body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:linear-gradient(180deg,var(--bg),#eef2ff);color:var(--text)}
+    .wrap{max-width:1100px;margin:0 auto;padding:18px 14px 100px} .top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+    h1{font-size:1.3rem;margin:0} .sub{color:var(--muted);margin:4px 0 0} .btn{border:0;border-radius:999px;padding:12px 16px;font-weight:700;cursor:pointer} .btn-primary{background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff} .btn-secondary{background:var(--card);color:var(--text);border:1px solid var(--line)}
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px} .card{grid-column:span 12;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:16px;box-shadow:var(--shadow)}
+    .card h2{margin:0 0 4px;font-size:1.05rem} .muted{color:var(--muted)} .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center} .field{display:flex;flex-direction:column;gap:8px;min-width:160px;flex:1} label{font-size:.86rem;color:var(--muted);font-weight:700}
+    input,textarea,select{width:100%;border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:16px;padding:12px 14px;font:inherit} textarea{min-height:110px;resize:vertical}
+    .pill{display:inline-flex;align-items:center;gap:8px;background:#eff6ff;color:#1d4ed8;border-radius:999px;padding:7px 12px;font-size:.85rem;font-weight:700} .tag{display:inline-flex;align-items:center;padding:6px 10px;border-radius:999px;background:#ecfeff;color:#0e7490;font-size:.8rem;font-weight:800}
+    .list{display:grid;gap:12px} .item{border:1px solid var(--line);border-radius:18px;padding:14px;background:rgba(255,255,255,.3)} .item-title{font-weight:800} .item-meta{color:var(--muted);font-size:.92rem;margin-top:4px}
+    .item-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.chip{border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:999px;padding:8px 12px;font-weight:800;cursor:pointer}.chip.good{background:#ecfdf5;color:#065f46}.chip.warn{background:#fff7ed;color:#9a3412}.chip.bad{background:#fef2f2;color:#991b1b}
+    .nav{position:fixed;left:50%;transform:translateX(-50%);bottom:10px;width:min(1100px,calc(100% - 16px));background:rgba(255,255,255,.86);backdrop-filter:blur(18px);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);display:grid;grid-template-columns:repeat(4,1fr);z-index:10;overflow:hidden}
+    .nav button{border:0;background:transparent;padding:14px 8px;color:var(--muted);font-weight:800;cursor:pointer}.nav button.active{color:var(--blue);background:rgba(37,99,235,.08)}
+    .hidden{display:none}.split{display:grid;grid-template-columns:repeat(2,1fr);gap:12px} @media (max-width:760px){.split{grid-template-columns:1fr}}
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px} .stat{border:1px solid var(--line);border-radius:18px;padding:12px;background:rgba(255,255,255,.45)} .stat strong{display:block;font-size:1.2rem} .stat span{color:var(--muted);font-size:.85rem}
+    .table{width:100%;border-collapse:collapse} .table th,.table td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left;font-size:.92rem} .table th{color:var(--muted);font-size:.82rem;text-transform:uppercase;letter-spacing:.04em}
+    .small{font-size:.86rem;color:var(--muted)} .center{display:flex;align-items:center;justify-content:center}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1>PD Supplies</h1>
+        <div class="sub">Simple inventory for PD supplies, quick stock changes, and iPhone-friendly use.</div>
+      </div>
+      <div class="row">
+        <button class="btn btn-secondary" id="themeBtn">Theme</button>
+        <button class="btn btn-secondary" id="exportBtn">Export JSON</button>
+        <label class="btn btn-secondary" for="importFile" style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;">Import JSON</label>
+        <input id="importFile" type="file" accept="application/json" class="hidden" />
+      </div>
+    </div>
+
+    <section class="card">
+      <div class="row" style="justify-content:space-between;align-items:flex-start;">
+        <div>
+          <h2>Overview</h2>
+          <div class="muted">Track what you have before reorder day.</div>
+        </div>
+        <span class="tag">Local storage</span>
+      </div>
+      <div class="stats" style="margin-top:14px;">
+        <div class="stat"><strong id="statTotal">0</strong><span>Total items</span></div>
+        <div class="stat"><strong id="statLow">0</strong><span>Need attention</span></div>
+        <div class="stat"><strong id="statOrdered">0</strong><span>Ordered</span></div>
+        <div class="stat"><strong id="statReceived">0</strong><span>Received</span></div>
+      </div>
+    </section>
+
+    <section id="inventoryView" class="card">
+      <div class="row" style="justify-content:space-between;align-items:flex-end;">
+        <div>
+          <h2>Inventory</h2>
+          <div class="muted">Add supplies, adjust quantity, and mark order status.</div>
+        </div>
+        <button class="btn btn-primary" id="addBtn">+ Add supply</button>
+      </div>
+      <div class="list" id="inventoryList" style="margin-top:14px;"></div>
+    </section>
+
+    <section id="reorderView" class="card hidden">
+      <h2>Reorder plan</h2>
+      <div class="muted">Items with low stock or order flags appear here.</div>
+      <div id="reorderList" class="list" style="margin-top:14px;"></div>
+    </section>
+
+    <section id="clinicView" class="card hidden">
+      <h2>Clinic pickup</h2>
+      <div class="muted">Items you want to pick up from the clinic.</div>
+      <div id="clinicList" class="list" style="margin-top:14px;"></div>
+    </section>
+
+    <section id="historyView" class="card hidden">
+      <h2>History</h2>
+      <div class="muted">Recent changes are listed here.</div>
+      <div id="historyList" class="list" style="margin-top:14px;"></div>
+    </section>
+  </div>
+
+  <nav class="nav">
+    <button data-tab="inventory" class="active">Inventory</button>
+    <button data-tab="reorder">Reorder</button>
+    <button data-tab="clinic">Clinic</button>
+    <button data-tab="history">History</button>
+  </nav>
+
+  <template id="itemTemplate">
+    <div class="item">
+      <div class="item-title"></div>
+      <div class="item-meta"></div>
+      <div class="item-actions"></div>
+    </div>
+  </template>
+
+  <script>
+    const KEY = 'pd-supplies-v2';
+    const state = load() || { items: [], history: [], tab: 'inventory' };
+    const $ = id => document.getElementById(id);
+    const escape = s => String(s ?? '').replace(/[&<>"]+/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+    function save(){ localStorage.setItem(KEY, JSON.stringify(state)); }
+    function load(){ try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch { return null; } }
+    function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+    function n(v){ return Number(v) || 0; }
+    function log(text){ state.history.unshift({ text, at: new Date().toISOString() }); state.history = state.history.slice(0,40); }
+    function addItem(){
+      const name = prompt('Item name?'); if(!name) return;
+      const onHand = prompt('On hand amount?', '0');
+      state.items.unshift({ id: uid(), name, onHand: n(onHand), reorderPoint: 0, reserve: 0, homeQty: 0, clinicQty: 0, ordered:false, received:false, notes:'' });
+      log(`Added ${name}`); save(); render();
+    }
+    function updateItem(id, patch){ const item = state.items.find(x => x.id === id); if(!item) return; Object.assign(item, patch); save(); render(); }
+    function removeItem(id){ const i = state.items.findIndex(x => x.id === id); if(i < 0) return; const name = state.items[i].name; if(confirm(`Delete ${name}?`)){ state.items.splice(i,1); log(`Deleted ${name}`); save(); render(); } }
+    function setTab(tab){ state.tab = tab; save(); render(); }
+    function low(item){ return n(item.onHand) <= Math.max(n(item.reorderPoint), n(item.reserve)); }
+    function cardHTML(item){
+      const el = $('itemTemplate').content.firstElementChild.cloneNode(true);
+      el.querySelector('.item-title').textContent = item.name;
+      el.querySelector('.item-meta').innerHTML = `On hand: <strong>${n(item.onHand)}</strong> • Reorder: ${n(item.reorderPoint)} • Reserve: ${n(item.reserve)}${item.notes ? '<br><span class="small">' + escape(item.notes) + '</span>' : ''}`;
+      const actions = el.querySelector('.item-actions');
+      const b = (t, cls, fn) => { const x = document.createElement('button'); x.className = 'chip ' + (cls||''); x.textContent = t; x.onclick = fn; actions.appendChild(x); };
+      b('-5','',()=>updateItem(item.id,{onHand:n(item.onHand)-5})); b('-1','',()=>updateItem(item.id,{onHand:n(item.onHand)-1})); b('+1','',()=>updateItem(item.id,{onHand:n(item.onHand)+1})); b('+5','',()=>updateItem(item.id,{onHand:n(item.onHand)+5}));
+      b('Ordered', item.ordered ? 'warn' : '', ()=>updateItem(item.id,{ordered:!item.ordered}));
+      b('Received', item.received ? 'good' : '', ()=>updateItem(item.id,{received:!item.received}));
+      b('Edit','',()=>editItem(item)); b('Delete','bad',()=>removeItem(item.id));
+      return el;
+    }
+    function editItem(item){
+      const name = prompt('Item name', item.name); if(!name) return;
+      const onHand = prompt('On hand', item.onHand);
+      const reorderPoint = prompt('Reorder point', item.reorderPoint);
+      const reserve = prompt('Reserve', item.reserve);
+      const homeQty = prompt('Home qty', item.homeQty);
+      const clinicQty = prompt('Clinic qty', item.clinicQty);
+      const notes = prompt('Notes', item.notes || '');
+      updateItem(item.id, { name, onHand:n(onHand), reorderPoint:n(reorderPoint), reserve:n(reserve), homeQty:n(homeQty), clinicQty:n(clinicQty), notes: notes || '' });
+      log(`Updated ${name}`);
+    }
+    function render(){
+      $('statTotal').textContent = state.items.length;
+      $('statLow').textContent = state.items.filter(low).length;
+      $('statOrdered').textContent = state.items.filter(i=>i.ordered).length;
+      $('statReceived').textContent = state.items.filter(i=>i.received).length;
+      document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active', b.dataset.tab === state.tab));
+      ['inventory','reorder','clinic','history'].forEach(tab => $(tab+'View').classList.toggle('hidden', state.tab !== tab));
+      $('inventoryList').innerHTML = ''; state.items.forEach(item => $('inventoryList').appendChild(cardHTML(item)));
+      $('reorderList').innerHTML = ''; state.items.filter(i => low(i) || i.ordered || i.received).forEach(item => $('reorderList').appendChild(cardHTML(item)));
+      $('clinicList').innerHTML = ''; state.items.filter(i => n(i.clinicQty) > 0).forEach(item => $('clinicList').appendChild(cardHTML(item)));
+      $('historyList').innerHTML = state.history.length ? state.history.map(h => `<div class="item"><div class="item-title">${escape(h.text)}</div><div class="item-meta">${new Date(h.at).toLocaleString()}</div></div>`).join('') : '<div class="item"><div class="item-title">No history yet</div><div class="item-meta">Changes will appear here.</div></div>';
+    }
+    $('addBtn').onclick = addItem;
+    $('themeBtn').onclick = () => { const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = next; save(); };
+    $('exportBtn').onclick = () => {
+      const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'pd-supplies-backup.json'; a.click(); URL.revokeObjectURL(a.href);
+    };
+    $('importFile').onchange = async (e) => {
+      const file = e.target.files[0]; if(!file) return;
+      const text = await file.text();
+      const data = JSON.parse(text);
+      if (!data || !Array.isArray(data.items)) { alert('That file does not look like a backup.'); return; }
+      state.items = data.items || []; state.history = data.history || []; state.tab = data.tab || 'inventory'; save(); render(); alert('Imported.');
+    };
+    document.querySelectorAll('.nav button').forEach(btn => btn.onclick = () => setTab(btn.dataset.tab));
+    if (!load()) {
+      state.items = [];
+      state.history = [];
+      log('Started new inventory');
+      save();
+    }
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (!localStorage.getItem(KEY + ':theme')) document.documentElement.dataset.theme = prefersDark ? 'dark' : 'light';
+    render();
+  </script>
+</body>
+</html>
