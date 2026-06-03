@@ -254,7 +254,8 @@
     <button class="tab" data-tab="inventory" type="button"><div class="ico">◫</div><div class="label">Inventory</div></button>
     <button class="tab" data-tab="notes" type="button"><div class="ico">✎</div><div class="label">Notes</div></button>
     <button class="tab" data-tab="history" type="button"><div class="ico">≡</div><div class="label">History</div></button>
-  </nav><script>
+  </nav>
+  <script>
   const KEY = 'dialysis-agent-companion-v2';
   const $ = id => document.getElementById(id);
   const state = load() || { theme:'light', tab:'home', treatments:[], inventory:[], notes:[], history:[] };
@@ -283,27 +284,7 @@
   function fmt(iso){ return new Date(iso).toLocaleString(); }
   function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
   function n(v){ return Number(v) || 0; }
-  function escapeHtml(s){ return String(s ?? '').replace(/[&<>\"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[m])); }
-
-  function formatDateDDMMMYY(date = new Date()) {
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = date.toLocaleString('en-US', { month: 'short' });
-    const year = String(date.getFullYear()).slice(-2);
-    return `${day}-${month}-${year}`;
-  }
-
-  function buildTreatmentLine(type, values, date = new Date()) {
-    const header = `${type.toUpperCase()} TREATMENT`;
-    const dateText = formatDateDDMMMYY(date);
-
-    return `${header}
-[${dateText} at ${values.time}] | [${values.weight}] | [${values.bpSystolic}]/[${values.bpDiastolic}] | [${values.pulse}] | [${values.temp}] | [${values.uf}] | [${values.percent}]`;
-  }
-
-  function showTreatmentPreview(type, values) {
-    const text = buildTreatmentLine(type, values);
-    return confirm(text + "\n\nSave this entry?");
-  }
+  function escapeHtml(s){ return String(s ?? '').replace(/[&<>\"]/g, m => ({'&':'amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[m])); }
 
   function renderCounts(){
     $('countTreatments').textContent = state.treatments.length;
@@ -354,57 +335,76 @@
   }
 
   function addTreatment(){
-    const type = prompt('Treatment type? (pre or post)', 'pre');
-    if (!type) return;
+    const pasted = prompt('Paste the Shortcut results here.');
+    if (!pasted) return;
 
-    const time = prompt('Time? (example: 23:02)', '');
-    if (!time) return;
+    const lines = String(pasted).split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+    if (!lines.length) return;
 
-    const weight = prompt('Weight?', '');
-    if (weight === null) return;
-
-    const bpSystolic = prompt('BP systolic?', '');
-    if (bpSystolic === null) return;
-
-    const bpDiastolic = prompt('BP diastolic?', '');
-    if (bpDiastolic === null) return;
-
-    const pulse = prompt('Pulse?', '');
-    if (pulse === null) return;
-
-    const temp = prompt('Temp?', '');
-    if (temp === null) return;
-
-    const uf = prompt('UF?', '');
-    if (uf === null) return;
-
-    const percent = prompt('Percent?', '');
-    if (percent === null) return;
-
-    const values = { time, weight, bpSystolic, bpDiastolic, pulse, temp, uf, percent };
-
-    if (!showTreatmentPreview(type, values)) return;
+    const header = lines[0];
+    const phase = /post/i.test(header) ? 'post' : 'pre';
+    const title = `${phase.toUpperCase()} TREATMENT`;
+    const detail = lines.join('\n');
 
     state.treatments.unshift({
       id: uid(),
-      title: `${type.toUpperCase()} TREATMENT`,
-      detail: buildTreatmentLine(type, values),
+      title,
+      phase,
+      detail,
       at: new Date().toISOString()
     });
 
-    log(`Added treatment: ${type.toUpperCase()} TREATMENT`);
+    log(`Added treatment: ${title}`);
+    render();
+  }
+
+  function findInventoryItemByName(name) {
+    const q = String(name || '').trim().toLowerCase();
+    return state.inventory.find(item => String(item.title || '').trim().toLowerCase() === q);
+  }
+
+  function applyInventoryCommand(text) {
+    const input = String(text || '').trim();
+    if (!input) return;
+
+    const match = input.match(/^(take|add)\s+(\d+)?\s*(.+)$/i);
+    if (!match) {
+      alert('Use: take 2 gauze or add 3 saline');
+      return;
+    }
+
+    const action = match[1].toLowerCase();
+    const amount = match[2] ? Number(match[2]) : 1;
+    const name = match[3].trim();
+    if (!name) return;
+
+    let item = findInventoryItemByName(name);
+
+    if (!item) {
+      item = {
+        id: uid(),
+        title: name,
+        detail: '',
+        qty: 0,
+        reorderPoint: 0,
+        ordered: false,
+        at: new Date().toISOString()
+      };
+      state.inventory.unshift(item);
+    }
+
+    const delta = action === 'take' ? -amount : amount;
+    item.qty = Math.max(0, n(item.qty) + delta);
+    item.at = new Date().toISOString();
+
+    log(`${action === 'take' ? 'Took' : 'Added'} ${amount} ${name}`);
     render();
   }
 
   function addInventoryItem(){
-    const title = prompt('Item name?');
-    if (!title) return;
-    const detail = prompt('Details?','') || '';
-    const qty = prompt('Quantity?','0');
-    const reorderPoint = prompt('Reorder point?','0');
-    state.inventory.unshift({id:uid(), title, detail, qty:n(qty), reorderPoint:n(reorderPoint), ordered:false, at:new Date().toISOString()});
-    log(`Added inventory item: ${title}`);
-    render();
+    const command = prompt('Type a command like: take 2 gauze or add 3 saline');
+    if (!command) return;
+    applyInventoryCommand(command);
   }
 
   function addNote(){
@@ -420,15 +420,18 @@
     const key = type === 'inventory' ? 'inventory' : type + 's';
     const item = state[key].find(x => x.id === itemId);
     if (!item) return;
+
     const title = prompt('Title', item.title || '');
     if (title === null) return;
     const detail = prompt('Details', item.detail || '') || '';
     item.title = title;
     item.detail = detail;
+
     if (type === 'inventory') {
       item.qty = n(prompt('Quantity', item.qty ?? 0));
       item.reorderPoint = n(prompt('Reorder point', item.reorderPoint ?? 0));
     }
+
     item.at = new Date().toISOString();
     log(`Edited ${type}: ${title}`);
     render();
@@ -439,8 +442,10 @@
     const list = state[key];
     const idx = list.findIndex(x => x.id === itemId);
     if (idx < 0) return;
+
     const name = list[idx].title || type;
     if (!confirm(`Delete ${name}?`)) return;
+
     list.splice(idx,1);
     log(`Deleted ${type}: ${name}`);
     render();
