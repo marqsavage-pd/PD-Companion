@@ -246,7 +246,9 @@
     function renderLists(){ $('treatmentsList').innerHTML=''; if (!state.treatments.length) $('treatmentsList').innerHTML='<div class="empty">No treatments logged yet.</div>'; state.treatments.forEach(item => $('treatmentsList').appendChild(treatmentEntry(item))); $('inventoryList').innerHTML=''; if (!state.inventory.length) $('inventoryList').innerHTML='<div class="empty">No inventory items yet.</div>'; state.inventory.forEach(item => $('inventoryList').appendChild(inventoryEntry(item))); $('notesList').innerHTML=''; if (!state.notes.length) $('notesList').innerHTML='<div class="empty">No notes yet.</div>'; state.notes.forEach(item => $('notesList').appendChild(noteEntry(item))); $('historyList').innerHTML=''; if (!state.history.length) $('historyList').innerHTML='<div class="empty">No history yet.</div>'; state.history.forEach(item => $('historyList').appendChild(historyEntry(item))); }
     function highlightTabs(){ document.querySelectorAll('.tab').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === state.tab)); }
     function render(){ document.documentElement.dataset.theme = state.theme || 'light'; renderCounts(); renderViews(); highlightTabs(); renderLists(); save(); }
-    document.querySelectorAll('[data-tab]').forEach(btn => btn.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); setTab(btn.dataset.tab); }));
+    document.querySelectorAll('#tabbar .tab').forEach(btn => {
+  btn.addEventListener('click', () => setTab(btn.dataset.tab));
+});
     $('themeToggle').addEventListener('click', () => setTheme((state.theme || 'light') === 'light' ? 'dark' : 'light'));
     $('addTreatmentBtn').addEventListener('click', addTreatment);
     $('addItemBtn').addEventListener('click', addInventoryItem);
