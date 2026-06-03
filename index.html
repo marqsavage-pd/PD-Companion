@@ -114,16 +114,32 @@
   .grid-2 { grid-template-columns:1fr; }
   .topbar-inner { flex-direction:column; align-items:stretch; }
   .brand { align-items:flex-start; }
-  .top-actions { width:100%; justify-content:space-between; flex-wrap:wrap; }
-  .top-actions .icon-btn { flex:0 0 48px; }
-  .top-actions .pill-btn { flex:1 1 calc(50% - 4px); min-height:44px; padding:0 12px; }
-  .top-actions .pill-btn.primary { flex:1 1 100%; }
+  .top-actions {
+    display:grid;
+    grid-template-columns:42px 1fr;
+    gap:8px;
+    width:100%;
+  }
+  .top-actions .icon-btn {
+    width:42px;
+    height:42px;
+  }
+  .top-actions .pill-btn {
+    width:100%;
+    min-height:42px;
+    padding:0 12px;
+  }
+  .top-actions .pill-btn.primary {
+    grid-column:1 / -1;
+  }
   .adjust-grid { grid-template-columns:repeat(2,1fr); }
   .tab { min-height:58px; }
   .tab .label { font-size:0.68rem; }
+  #historyView { display:none !important; }
+  #tabbar .tab[data-tab="history"] { display:none !important; }
+  #tabbar { grid-template-columns:repeat(4, 1fr); }
 }
-
-  </style>
+</style>
 </head>
 <body>
   <div class="app">
