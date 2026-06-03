@@ -110,50 +110,24 @@
     .empty { color:var(--muted); text-align:center; padding:18px 10px; }
     .hidden { display:none !important; }
   @media (max-width:640px) {
-  .status-row, .grid-3 { grid-template-columns:1fr; }
-  .grid-2 { grid-template-columns:1fr; }
-
-  .topbar-inner {
-    flex-direction:column;
-    align-items:stretch;
-    padding:8px 10px;
-    gap:8px;
-  }
-
-  .brand { align-items:flex-start; }
-
   .top-actions {
-    display:grid;
-    grid-template-columns:42px 1fr;
+    display:flex;
     gap:6px;
-    width:100%;
-  }
-
-  .top-actions .icon-btn {
-    width:42px;
-    height:42px;
-    min-height:42px;
-    padding:0;
-    border-radius:12px;
+    flex-wrap:wrap;
+    width:auto;
   }
 
   .top-actions .pill-btn {
-    width:100%;
+    width:auto;
     min-height:34px;
     height:34px;
     padding:0 10px;
-    font-size:0.82rem;
-    line-height:1;
-    box-shadow:none;
-    border-radius:12px;
   }
 
   .top-actions .pill-btn.primary {
-    grid-column:1 / -1;
-    min-height:34px;
-    height:34px;
+    grid-column:auto;
   }
-
+}
   .adjust-grid { grid-template-columns:repeat(2,1fr); }
   .tab { min-height:58px; }
   .tab .label { font-size:0.68rem; }
