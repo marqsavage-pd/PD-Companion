@@ -7,117 +7,116 @@
   <style>
     :root { color-scheme: light; }
 
-body {
-  font-family: system-ui, -apple-system, sans-serif;
-  margin: 0;
-  background: #ffffff;
-  color: #111827;
-}
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      margin: 0;
+      background: #ffffff;
+      color: #111827;
+    }
 
-header, nav, main {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 16px;
-}
+    header, nav, main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 16px;
+    }
 
-nav {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  align-items: center;
-}
+    nav {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
 
-.tab, .btn, .linkbtn {
-  border: 1px solid rgba(17, 24, 39, 0.15);
-  border-radius: 10px;
-  padding: 10px 14px;
-  cursor: pointer;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  color: inherit;
-  background: #f3f4f6;
-}
+    .tab, .btn, .linkbtn {
+      border: 1px solid rgba(17, 24, 39, 0.15);
+      border-radius: 10px;
+      padding: 10px 14px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: #111827;
+      background: #f3f4f6;
+      font-size: 14px;
+    }
 
-.linkbtn {
-  padding: 8px 12px;
+    .linkbtn {
+      padding: 8px 12px;
+    }
 
+    .tab.active {
+      background: #2563eb;
+      color: #ffffff;
+    }
 
-}
-.tab.active {
-  background: #2563eb;
-  color: #ffffff;
-}
+    .btn {
+      background: #f3f4f6;
+      color: #111827;
+    }
 
-.btn {
-  background: #f3f4f6;
-  color: #111827;
-}
+    .btn-secondary {
+      background: #f3f4f6;
+    }
 
-.btn-secondary {
-  background: #f3f4f6;
-}
+    .btn-danger {
+      background: #fee2e2;
+      color: #991b1b;
+    }
 
-.btn-danger {
-  background: #fee2e2;
-  color: #991b1b;
-}
+    .view { display: none; }
+    .view.active { display: block; }
 
-.view { display: none; }
-.view.active { display: block; }
+    .grid { display: grid; gap: 12px; }
 
-.grid { display: grid; gap: 12px; }
+    .item, .history-entry, .panel {
+      background: #ffffff;
+      border: 1px solid rgba(17, 24, 39, 0.10);
+      border-radius: 14px;
+      padding: 14px;
+    }
 
-.item, .history-entry, .panel {
-  background: #ffffff;
-  border: 1px solid rgba(17, 24, 39, 0.10);
-  border-radius: 14px;
-  padding: 14px;
-}
+    .between { display: flex; justify-content: space-between; gap: 12px; align-items: start; }
+    .row { display: flex; gap: 8px; align-items: center; }
+    .wrap { flex-wrap: wrap; }
+    .item-title { font-weight: 700; }
+    .meta { opacity: .72; font-size: 14px; white-space: pre-wrap; }
 
-.between { display: flex; justify-content: space-between; gap: 12px; align-items: start; }
-.row { display: flex; gap: 8px; align-items: center; }
-.wrap { flex-wrap: wrap; }
-.item-title { font-weight: 700; }
-.meta { opacity: .72; font-size: 14px; white-space: pre-wrap; }
+    .tag, .status {
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(17, 24, 39, 0.08);
+    }
 
-.tag, .status {
-  font-size: 12px;
-  padding: 4px 8px;
-  border-radius: 999px;
-  background: rgba(17, 24, 39, 0.08);
-}
+    .status.good { background: #dcfce7; color: #166534; }
+    .status.bad { background: #fee2e2; color: #991b1b; }
+    .status.warn { background: #fef3c7; color: #92400e; }
 
-.status.good { background: #dcfce7; color: #166534; }
-.status.bad { background: #fee2e2; color: #991b1b; }
-.status.warn { background: #fef3c7; color: #92400e; }
+    .qty { font-size: 28px; font-weight: 700; }
 
-.qty { font-size: 28px; font-weight: 700; }
+    .adjust-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }
 
-.adjust-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
-  margin-top: 10px;
-}
+    .empty { opacity: .7; padding: 14px; text-align: center; }
 
-.empty { opacity: .7; padding: 14px; text-align: center; }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(17, 24, 39, 0.15);
+      background: #ffffff;
+      color: #111827;
+    }
 
-input[type="text"] {
-  width: 100%;
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid rgba(17, 24, 39, 0.15);
-  background: #ffffff;
-  color: #111827;
-}
-
-@media (max-width: 700px) {
-  .adjust-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-
+    @media (max-width: 700px) {
+      .adjust-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
   </style>
 </head>
 <body>
@@ -221,7 +220,7 @@ input[type="text"] {
     function fmt(iso){ return new Date(iso).toLocaleString(); }
     function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
     function n(v){ return Number(v) || 0; }
-    function escapeHtml(s){ return String(s ?? '').replace(/[&<>\"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[m])); }
+    function escapeHtml(s){ return String(s ?? '').replace(/[&<>\\"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','\\"':'&quot;'}[m])); }
 
     function cutoffDate(days){
       return new Date(Date.now() - days * 24 * 60 * 60 * 1000);
@@ -278,7 +277,7 @@ input[type="text"] {
       const low = n(item.qty) <= n(item.reorderPoint || 0);
       const div = document.createElement('div');
       div.className = 'item';
-      div.innerHTML = `<div class="between"><div><div class="item-title">${escapeHtml(item.title || 'Item')}</div><div class="meta">${escapeHtml(item.detail || '')}</div></div><span class="status ${item.ordered ? 'warn' : (low ? 'bad' : 'good')}">${item.ordered ? 'Ordered' : (low ? 'Low' : 'OK')}</span></div><div class="between" style="margin-top:10px;"><div class="qty">${n(item.qty)}</div><div class="meta">Reorder at ${n(item.reorderPoint || 0)}</div></div><div class="adjust-grid"><button class="btn small btn-secondary" data-adjust="-5" data-id="${item.id}">-5</button><button class="btn small btn-secondary" data-adjust="-1" data-id="${item.id}">-1</button><button class="btn small btn-secondary" data-adjust="1" data-id="${item.id}">+1</button><button class="btn small btn-secondary" data-adjust="5" data-id="${item.id}">+5</button></div><div class="row wrap" style="margin-top:10px;"><button class="btn small btn-secondary" data-order="${item.id}">${item.ordered ? 'Unmark ordered' : 'Mark ordered'}</button><button class="btn small btn-secondary" data-edit="inventory" data-id="${item.id}">Edit</button><button class="btn small btn-danger" data-del="inventory" data-id="${item.id}">Delete</button></div>`;
+      div.innerHTML = `<div class="between"><div><div class="item-title">${escapeHtml(item.title || 'Item')}</div><div class="meta">${escapeHtml(item.detail || '')}</div></div><span class="status ${item.ordered ? 'warn' : (low ? 'bad' : 'good')}">${item.ordered ? 'Ordered' : (low ? 'Low' : 'OK')}</span></div><div class="between" style="margin-top:10px;"><div class="qty">${n(item.qty)}</div><div class="meta">Reorder at ${n(item.reorderPoint || 0)}</div></div><div class="adjust-grid"><button class="btn small btn-secondary" data-adjust="-5" data-id="${item.id}">-5</button><button class="btn small btn-secondary" data-adjust="-1" data-id="${item.id}">-1</button><button class="btn small btn-secondary" data-adjust="1" data-id="${item.id}">+1</button><button class="btn small btn-secondary" data-adjust="5" data-id="${item.id}">+5</button></div><div class="row wrap" style="margin-top:10px;"><button class="btn small btn-secondary" data-order="${item.id}">${item.ordered ? 'Unorder' : 'Order'}</button><button class="btn small btn-secondary" data-edit="inventory" data-id="${item.id}">Edit</button><button class="btn small btn-danger" data-del="inventory" data-id="${item.id}">Delete</button></div>`;
       return div;
     }
 
@@ -289,71 +288,30 @@ input[type="text"] {
       return div;
     }
 
-    function historyEntry(item){
-      const div = document.createElement('div');
-      div.className = 'history-entry';
-      div.innerHTML = `<div class="meta">${fmt(item.at)}</div><div>${escapeHtml(item.text)}</div>`;
-      return div;
-    }
-
     function addTreatment(){
-      const pasted = prompt('Paste the Shortcut results here.');
-      if (!pasted) return;
-      const lines = String(pasted).split(/\r?\n/).map(s => s.trim()).filter(Boolean);
-      if (!lines.length) return;
-      const header = lines[0];
-      const phase = /post/i.test(header) ? 'post' : 'pre';
-      const title = `${phase.toUpperCase()} TREATMENT`;
-      state.treatments.unshift({ id: uid(), title, phase, detail: lines.join('\n'), at: new Date().toISOString() });
+      const title = prompt('Treatment title');
+      if (!title) return;
+      const detail = prompt('Details', '') || '';
+      state.treatments.unshift({ id: uid(), title, detail, at: new Date().toISOString() });
       log(`Added treatment: ${title}`);
       render();
     }
 
-    function findInventoryItemByName(name) {
-      const q = String(name || '').trim().toLowerCase();
-      return state.inventory.find(item => String(item.title || '').trim().toLowerCase() === q);
-    }
-
-    function applyInventoryCommand(text) {
-      const input = String(text || '').trim();
-      if (!input) return;
-
-      const match = input.match(/^(take|add)\s+(\d+)?\s*(.+)$/i);
-      if (!match) {
-        alert('Use: take 2 gauze or add 3 saline');
-        return;
-      }
-
-      const action = match[1].toLowerCase();
-      const amount = match[2] ? Number(match[2]) : 1;
-      const name = match[3].trim();
-      if (!name) return;
-
-      let item = findInventoryItemByName(name);
-
-      if (!item) {
-        item = { id: uid(), title: name, detail: '', qty: 0, reorderPoint: 0, ordered: false, at: new Date().toISOString() };
-        state.inventory.unshift(item);
-      }
-
-      const delta = action === 'take' ? -amount : amount;
-      item.qty = Math.max(0, n(item.qty) + delta);
-      item.at = new Date().toISOString();
-
-      log(`${action === 'take' ? 'Took' : 'Added'} ${amount} ${name}`);
+    function addInventoryItem(){
+      const title = prompt('Item name');
+      if (!title) return;
+      const detail = prompt('Details', '') || '';
+      const qty = n(prompt('Quantity', '0'));
+      const reorderPoint = n(prompt('Reorder point', '0'));
+      state.inventory.unshift({ id: uid(), title, detail, qty, reorderPoint, ordered: false, at: new Date().toISOString() });
+      log(`Added inventory: ${title}`);
       render();
     }
 
-    function addInventoryItem(){
-      const command = prompt('Type a command like: take 2 gauze or add 3 saline');
-      if (!command) return;
-      applyInventoryCommand(command);
-    }
-
     function addNote(){
-      const title = prompt('Note title?');
+      const title = prompt('Note title');
       if (!title) return;
-      const detail = prompt('Note text?','') || '';
+      const detail = prompt('Note text', '') || '';
       state.notes.unshift({ id: uid(), title, detail, at: new Date().toISOString() });
       log(`Added note: ${title}`);
       render();
@@ -361,7 +319,8 @@ input[type="text"] {
 
     function editByType(type, itemId){
       const key = type === 'inventory' ? 'inventory' : type + 's';
-      const item = state[key].find(x => x.id === itemId);
+      const list = state[key];
+      const item = list.find(x => x.id === itemId);
       if (!item) return;
 
       const title = prompt('Title', item.title || '');
@@ -392,6 +351,16 @@ input[type="text"] {
       list.splice(idx,1);
       log(`Deleted ${type}: ${name}`);
       render();
+    }
+
+    function normalizeImportedData(data){
+      return {
+        tab: ['home','treatments','inventory','notes','history'].includes(data.tab) ? data.tab : 'home',
+        treatments: Array.isArray(data.treatments) ? data.treatments.filter(x => x && typeof x === 'object') : [],
+        inventory: Array.isArray(data.inventory) ? data.inventory.filter(x => x && typeof x === 'object') : [],
+        notes: Array.isArray(data.notes) ? data.notes.filter(x => x && typeof x === 'object') : [],
+        history: Array.isArray(data.history) ? data.history.filter(x => x && typeof x === 'object') : []
+      };
     }
 
     function renderLists(){
@@ -456,7 +425,8 @@ input[type="text"] {
 
       if (searchClear) {
         state.inventorySearch = '';
-        $('inventoryList').previousElementSibling?.value = '';
+        const input = document.querySelector('[data-inventory-search]');
+        if (input) input.value = '';
         render();
         return;
       }
@@ -487,14 +457,13 @@ input[type="text"] {
               state.treatments = imported.treatments;
               state.inventory = imported.inventory;
               state.notes = imported.notes;
-              state.history = Array.isArray(imported.history) ? imported.history.filter(h => h && h.at && h.text) : [];
+              state.history = imported.history;
               state.inventorySearch = '';
               state.showAllTreatments = false;
-              log(`Imported backup: ${file.name}`);
-              save();
+              log('Imported data');
               render();
             } catch {
-              alert('That file could not be imported.');
+              alert('Could not import file');
             }
           };
           input.click();
@@ -502,77 +471,44 @@ input[type="text"] {
         return;
       }
 
-      if (edit) {
-        editByType(edit.dataset.edit, edit.dataset.id);
-        return;
-      }
-
-      if (del) {
-        deleteByType(del.dataset.del, del.dataset.id);
-        return;
-      }
-
+      if (edit) { editByType(edit.dataset.edit, edit.dataset.id); return; }
+      if (del) { deleteByType(del.dataset.del, del.dataset.id); return; }
       if (adjust) {
         const item = state.inventory.find(x => x.id === adjust.dataset.id);
         if (!item) return;
-        item.qty = n(item.qty) + n(adjust.dataset.adjust);
-        log(`Adjusted ${item.title}: ${adjust.dataset.adjust}`);
+        item.qty = Math.max(0, n(item.qty) + n(adjust.dataset.adjust));
+        item.at = new Date().toISOString();
+        log(`Adjusted inventory: ${item.title} (${adjust.dataset.adjust})`);
         render();
         return;
       }
-
       if (order) {
-        const item = state.inventory.find(x => x.id === order.dataset.id);
+        const item = state.inventory.find(x => x.id === order.dataset.order);
         if (!item) return;
         item.ordered = !item.ordered;
-        log(`${item.ordered ? 'Marked' : 'Unmarked'} ordered: ${item.title}`);
+        item.at = new Date().toISOString();
+        log(`${item.ordered ? 'Ordered' : 'Unordered'} inventory: ${item.title}`);
         render();
-        return;
       }
     });
 
-    document.body.addEventListener('input', (e) => {
-      const search = e.target.closest('[data-inventory-search]');
-      if (!search) return;
-      state.inventorySearch = search.value;
-      renderLists();
-      save();
+    document.addEventListener('input', (e) => {
+      if (e.target.matches('[data-inventory-search]')) {
+        state.inventorySearch = e.target.value;
+        save();
+        renderLists();
+      }
     });
 
-    function normalizeImportedData(data){
-      const out = {
-        tab: data.tab || data.activeTab || 'home',
-        treatments: [],
-        inventory: [],
-        notes: [],
-        history: Array.isArray(data.history) ? data.history : []
-      };
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!state.tab) state.tab = 'home';
+      render();
+    });
 
-      if (Array.isArray(data.treatments)) out.treatments = data.treatments;
-      if (Array.isArray(data.notes)) out.notes = data.notes;
-
-      if (Array.isArray(data.inventory)) {
-        out.inventory = data.inventory;
-      } else if (Array.isArray(data.items)) {
-        out.inventory = data.items.map(item => ({
-          id: item.id || uid(),
-          title: item.name || 'Item',
-          detail: [item.category, item.unit, item.expires ? `Expires: ${item.expires}` : '', item.status ? `Status: ${item.status}` : '', item.notes || ''].filter(Boolean).join(' • '),
-          qty: n(item.onHand),
-          reorderPoint: n(item.reorderPoint),
-          ordered: String(item.status || '').toLowerCase().includes('order'),
-          at: new Date().toISOString()
-        }));
-      }
-
-      return out;
-    }
-
-    setTab(state.tab || 'home');
-    render();window.addEventListener('DOMContentLoaded', () => {
-  if (!state.tab) state.tab = 'home';
-  render();
-});
+    render();
   </script>
 </body>
 </html>
+
+
+
