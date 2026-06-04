@@ -255,7 +255,7 @@
     <button class="tab" data-tab="notes" type="button"><div class="ico">✎</div><div class="label">Notes</div></button>
     <button class="tab" data-tab="history" type="button"><div class="ico">≡</div><div class="label">History</div></button>
   </nav>
-  <script>
+ <script>
   const KEY = 'dialysis-agent-companion-v2';
   const $ = id => document.getElementById(id);
   const state = load() || { theme:'light', tab:'home', treatments:[], inventory:[], notes:[], history:[] };
@@ -276,18 +276,35 @@
   function setTab(tab){
     state.tab = tab;
     save();
-    renderViews();
-    renderCounts();
-    renderLists();
-    highlightTabs();
+    render();
   }
   function fmt(iso){ return new Date(iso).toLocaleString(); }
   function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
   function n(v){ return Number(v) || 0; }
   function escapeHtml(s){ return String(s ?? '').replace(/[&<>\"]/g, m => ({'&':'amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[m])); }
 
+  function cutoffDate(days){
+    return new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+  }
+
+  function itemsInLastDays(list, days){
+    const cutoff = cutoffDate(days);
+    return list.filter(item => {
+      const d = new Date(item.at || 0);
+      return !isNaN(d) && d >= cutoff;
+    });
+  }
+
+  function recentTreatments(){
+    return itemsInLastDays(state.treatments, 5);
+  }
+
+  function historyTreatments(){
+    return itemsInLastDays(state.treatments, 10);
+  }
+
   function renderCounts(){
-    $('countTreatments').textContent = state.treatments.length;
+    $('countTreatments').textContent = recentTreatments().length;
     $('countItems').textContent = state.inventory.length;
     $('countNotes').textContent = state.notes.length;
   }
@@ -452,9 +469,12 @@
   }
 
   function renderLists(){
+    const treatments = recentTreatments();
+    const historyWindow = historyTreatments();
+
     $('treatmentsList').innerHTML = '';
-    if (!state.treatments.length) $('treatmentsList').innerHTML = '<div class="empty">No treatments logged yet.</div>';
-    state.treatments.forEach(item => $('treatmentsList').appendChild(treatmentEntry(item)));
+    if (!treatments.length) $('treatmentsList').innerHTML = '<div class="empty">No treatments in the last 5 days.</div>';
+    treatments.forEach(item => $('treatmentsList').appendChild(treatmentEntry(item)));
 
     $('inventoryList').innerHTML = '';
     if (!state.inventory.length) $('inventoryList').innerHTML = '<div class="empty">No inventory items yet.</div>';
@@ -465,8 +485,8 @@
     state.notes.forEach(item => $('notesList').appendChild(noteEntry(item)));
 
     $('historyList').innerHTML = '';
-    if (!state.history.length) $('historyList').innerHTML = '<div class="empty">No history yet.</div>';
-    state.history.forEach(item => $('historyList').appendChild(historyEntry(item)));
+    if (!historyWindow.length) $('historyList').innerHTML = '<div class="empty">No treatments in the last 10 days.</div>';
+    historyWindow.forEach(item => $('historyList').appendChild(historyEntry(item)));
   }
 
   function highlightTabs(){
@@ -482,8 +502,11 @@
     save();
   }
 
-  document.querySelectorAll('#tabbar .tab').forEach(btn => {
-    btn.addEventListener('click', () => setTab(btn.dataset.tab));
+  document.querySelectorAll('[data-tab]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      setTab(btn.dataset.tab);
+    });
   });
 
   $('themeToggle').addEventListener('click', () => setTheme((state.theme || 'light') === 'light' ? 'dark' : 'light'));
@@ -499,13 +522,6 @@
   }));
 
   document.body.addEventListener('click', (e) => {
-    const tabBtn = e.target.closest('[data-tab]');
-    if (tabBtn) {
-      e.preventDefault();
-      setTab(tabBtn.dataset.tab);
-      return;
-    }
-
     const edit = e.target.closest('[data-edit]');
     const del = e.target.closest('[data-del]');
     const adjust = e.target.closest('[data-adjust]');
@@ -513,12 +529,12 @@
 
     if (edit) {
       editByType(edit.dataset.edit, edit.dataset.id);
-      render();
+      return;
     }
 
     if (del) {
       deleteByType(del.dataset.del, del.dataset.id);
-      render();
+      return;
     }
 
     if (adjust) {
@@ -527,6 +543,7 @@
       item.qty = n(item.qty) + n(adjust.dataset.adjust);
       log(`Adjusted ${item.title}: ${adjust.dataset.adjust}`);
       render();
+      return;
     }
 
     if (order) {
@@ -535,6 +552,7 @@
       item.ordered = !item.ordered;
       log(`${item.ordered ? 'Marked' : 'Unmarked'} ordered: ${item.title}`);
       render();
+      return;
     }
   });
 
