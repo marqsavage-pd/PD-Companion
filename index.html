@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>PD Companion</title>
   <style>
     :root { color-scheme: light; }
@@ -51,6 +52,8 @@
     .small { font-size: 12px; opacity: .72; }
     .tag { display: inline-block; padding: 4px 8px; border-radius: 999px; background: rgba(17,24,39,.08); font-size: 12px; }
     .danger { background: #fee2e2; color: #991b1b; }
+    .cmdbar { display:flex; gap:8px; margin-top:12px; }
+    .cmdbar input { flex:1; }
     @media (max-width: 700px) {
       .dashboard-grid, .quick-links { grid-template-columns: 1fr; }
     }
@@ -110,9 +113,21 @@
           <h2>Inventory</h2>
           <button class="btn" id="clearInventorySearchBtn">Clear Search</button>
         </div>
+
         <div style="margin: 12px 0;">
           <input type="text" id="inventorySearch" placeholder="Search inventory">
         </div>
+
+        <div class="panel" style="margin-bottom: 12px;">
+          <div class="quick-link-title">Quick inventory command</div>
+          <div class="quick-link-desc">Type things like: take 3 minicaps, add 10 dialysate 2.5 6L, +10 saline, -2 gauze.</div>
+          <div class="cmdbar">
+            <input type="text" id="inventoryCommand" placeholder="add 10 dialysate 2.5 6L">
+            <button class="btn" id="runInventoryCommandBtn">Run</button>
+          </div>
+          <div class="small" id="commandHelpText" style="margin-top:8px;"></div>
+        </div>
+
         <div id="inventoryList" class="grid"></div>
       </div>
     </section>
@@ -129,7 +144,7 @@
   </main>
 
   <script>
-    const KEY = 'pd-companion-scratch-v1';
+    const KEY = 'pd-companion-scratch-v2';
     const $ = id => document.getElementById(id);
 
     const defaults = {
@@ -237,10 +252,10 @@
           <div class="small">Reorder at ${n(item.reorderPoint || 0)}</div>
         </div>
         <div class="row" style="margin-top: 10px;">
-          <button class="btn" data-adjust="-1" data-id="${item.id}">-1</button>
-          <button class="btn" data-adjust="1" data-id="${item.id}">+1</button>
-          <button class="btn" data-adjust="5" data-id="${item.id}">+5</button>
-          <button class="btn" data-adjust="-5" data-id="${item.id}">-5</button>
+          <button class="btn" data-quick="take1" data-id="${item.id}">Take 1</button>
+          <button class="btn" data-quick="add1" data-id="${item.id}">Add 1</button>
+          <button class="btn" data-quick="take5" data-id="${item.id}">Take 5</button>
+          <button class="btn" data-quick="add5" data-id="${item.id}">Add 5</button>
           <button class="btn" data-order="${item.id}">${item.ordered ? 'Unorder' : 'Order'}</button>
           <button class="btn" data-edit="inventory" data-id="${item.id}">Edit</button>
           <button class="btn" data-del="inventory" data-id="${item.id}">Delete</button>
@@ -354,17 +369,71 @@
       if (!item) return;
       item.qty = Math.max(0, n(item.qty) + n(delta));
       item.at = new Date().toISOString();
-      log(`Adjusted inventory: ${item.title} (${delta})`);
+      log(`${delta > 0 ? 'Added' : 'Took'} ${Math.abs(delta)} of ${item.title}`);
       render();
     }
 
-    function toggleOrdered(id) {
-      const item = state.inventory.find(x => x.id === id);
-      if (!item) return;
-      item.ordered = !item.ordered;
+    function quickAdjustByName(command) {
+      const raw = String(command || '').trim();
+      if (!raw) return { ok: false, message: 'Type a command like "take 3 minicaps" or "add 10 dialysate 2.5 6L".' };
+
+      const match = raw.match(/^(add|take|\+|-)\s*(\d+)\s+(.+)$/i);
+      if (!match) {
+        return { ok: false, message: 'Use: add 10 item, take 3 item, +10 item, or -3 item.' };
+      }
+
+      const action = match[1].toLowerCase();
+      const amount = parseInt(match[2], 10);
+      const name = match[3].trim().toLowerCase();
+
+      const delta = (action === 'take' || action === '-') ? -amount : amount;
+
+      let item = state.inventory.find(i =>
+        String(i.title || '').trim().toLowerCase() === name
+      );
+
+      if (!item) {
+        const matches = state.inventory.filter(i =>
+          String(i.title || '').trim().toLowerCase().includes(name) ||
+          name.includes(String(i.title || '').trim().toLowerCase())
+        );
+
+        if (matches.length === 1) item = matches[0];
+        else if (matches.length > 1) {
+          const pick = prompt(
+            'Multiple matches found. Type the exact item name:\n\n' +
+            matches.map(m => '- ' + m.title).join('\n')
+          );
+          if (!pick) return { ok: false, message: 'Cancelled.' };
+          item = state.inventory.find(i => String(i.title || '').trim().toLowerCase() === pick.trim().toLowerCase());
+        }
+      }
+
+      if (!item) {
+        const createNew = confirm(`"${match[3].trim()}" not found. Create it with quantity ${Math.max(0, delta)}?`);
+        if (!createNew) return { ok: false, message: 'Cancelled.' };
+        item = {
+          id: uid(),
+          title: match[3].trim(),
+          detail: '',
+          qty: Math.max(0, delta),
+          reorderPoint: 0,
+          ordered: false,
+          at: new Date().toISOString()
+        };
+        state.inventory.unshift(item);
+        log(`Created inventory: ${item.title} (${delta > 0 ? 'add' : 'take'} ${amount})`);
+        saveState();
+        render();
+        return { ok: true, message: `Created ${item.title}.` };
+      }
+
+      item.qty = Math.max(0, n(item.qty) + delta);
       item.at = new Date().toISOString();
-      log(`${item.ordered ? 'Ordered' : 'Unordered'} inventory: ${item.title}`);
+      log(`${delta > 0 ? 'Added' : 'Took'} ${amount} of ${item.title}`);
+      saveState();
       render();
+      return { ok: true, message: `${delta > 0 ? 'Added' : 'Took'} ${amount} of ${item.title}.` };
     }
 
     function exportState() {
@@ -433,6 +502,20 @@
       render();
     });
 
+    $('runInventoryCommandBtn').addEventListener('click', () => {
+      const input = $('inventoryCommand');
+      const result = quickAdjustByName(input.value);
+      $('commandHelpText').textContent = result.message || '';
+      if (result.ok) input.value = '';
+    });
+
+    $('inventoryCommand').addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        $('runInventoryCommandBtn').click();
+      }
+    });
+
     document.body.addEventListener('click', e => {
       const edit = e.target.closest('[data-edit]');
       const del = e.target.closest('[data-del]');
@@ -441,7 +524,14 @@
       if (edit) return editByType(edit.dataset.edit, edit.dataset.id);
       if (del) return delByType(del.dataset.del, del.dataset.id);
       if (adjust) return adjustInventory(adjust.dataset.id, adjust.dataset.adjust);
-      if (order) return toggleOrdered(order.dataset.order);
+      if (order) {
+        const item = state.inventory.find(x => x.id === order.dataset.order);
+        if (!item) return;
+        item.ordered = !item.ordered;
+        item.at = new Date().toISOString();
+        log(`${item.ordered ? 'Ordered' : 'Unordered'} inventory: ${item.title}`);
+        render();
+      }
     });
 
     render();
