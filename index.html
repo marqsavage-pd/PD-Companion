@@ -260,6 +260,9 @@
   const $ = id => document.getElementById(id);
   const state = load() || { theme:'light', tab:'home', treatments:[], inventory:[], notes:[], history:[] };
 
+  let inventorySearchMode = false;
+  let inventorySearchResults = [];
+
   function load(){ try { return JSON.parse(localStorage.getItem(KEY)); } catch { return null; } }
   function save(){ localStorage.setItem(KEY, JSON.stringify(state)); }
   function log(text){
@@ -301,6 +304,33 @@
 
   function historyTreatments(){
     return itemsInLastDays(state.treatments, 10);
+  }
+
+  function getInventoryToShow(){
+    return inventorySearchMode ? inventorySearchResults : state.inventory;
+  }
+
+  function searchInventory(query) {
+    const q = String(query || '').trim().toLowerCase();
+    if (!q) {
+      inventorySearchMode = false;
+      inventorySearchResults = [];
+      render();
+      return;
+    }
+
+    inventorySearchMode = true;
+    inventorySearchResults = state.inventory.filter(item =>
+      String(item.title || '').toLowerCase().includes(q) ||
+      String(item.detail || '').toLowerCase().includes(q)
+    );
+    render();
+  }
+
+  function clearInventorySearch() {
+    inventorySearchMode = false;
+    inventorySearchResults = [];
+    render();
   }
 
   function renderCounts(){
@@ -471,14 +501,19 @@
   function renderLists(){
     const treatments = recentTreatments();
     const historyWindow = historyTreatments();
+    const inventoryToShow = getInventoryToShow();
 
     $('treatmentsList').innerHTML = '';
     if (!treatments.length) $('treatmentsList').innerHTML = '<div class="empty">No treatments in the last 5 days.</div>';
     treatments.forEach(item => $('treatmentsList').appendChild(treatmentEntry(item)));
 
     $('inventoryList').innerHTML = '';
-    if (!state.inventory.length) $('inventoryList').innerHTML = '<div class="empty">No inventory items yet.</div>';
-    state.inventory.forEach(item => $('inventoryList').appendChild(inventoryEntry(item)));
+    if (!inventoryToShow.length) {
+      $('inventoryList').innerHTML = inventorySearchMode
+        ? '<div class="empty">No inventory items matched your search.</div>'
+        : '<div class="empty">No inventory items yet.</div>';
+    }
+    inventoryToShow.forEach(item => $('inventoryList').appendChild(inventoryEntry(item)));
 
     $('notesList').innerHTML = '';
     if (!state.notes.length) $('notesList').innerHTML = '<div class="empty">No notes yet.</div>';
@@ -522,6 +557,13 @@
   }));
 
   document.body.addEventListener('click', (e) => {
+    const tabBtn = e.target.closest('[data-tab]');
+    if (tabBtn) {
+      e.preventDefault();
+      setTab(tabBtn.dataset.tab);
+      return;
+    }
+
     const edit = e.target.closest('[data-edit]');
     const del = e.target.closest('[data-del]');
     const adjust = e.target.closest('[data-adjust]');
