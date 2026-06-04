@@ -5,31 +5,74 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>PD Companion</title>
   <style>
-    body { font-family: system-ui, -apple-system, sans-serif; margin: 0; background: #f6f7fb; color: #1f2937; }
-    header, nav, main { max-width: 1100px; margin: 0 auto; padding: 16px; }
-    nav { display: flex; gap: 8px; flex-wrap: wrap; }
-    .tab, .btn { border: 0; border-radius: 10px; padding: 10px 14px; cursor: pointer; }
+    :root { color-scheme: light dark; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      margin: 0;
+      background: Canvas;
+      color: CanvasText;
+    }
+    header, nav, main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+    nav {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .tab, .btn, .linkbtn {
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: inherit;
+    }
     .tab.active { background: #2563eb; color: white; }
-    .btn { background: #e5e7eb; }
-    .btn-secondary { background: #e5e7eb; }
-    .btn-danger { background: #fee2e2; }
+    .btn { background: ButtonFace; color: ButtonText; }
+    .btn-secondary { background: ButtonFace; }
+    .btn-danger { background: #fee2e2; color: #991b1b; }
     .view { display: none; }
     .view.active { display: block; }
     .grid { display: grid; gap: 12px; }
-    .item, .history-entry, .panel { background: white; border-radius: 14px; padding: 14px; box-shadow: 0 1px 2px rgba(0,0,0,.06); }
+    .item, .history-entry, .panel {
+      background: Canvas;
+      border: 1px solid color-mix(in srgb, CanvasText 10%, transparent);
+      border-radius: 14px;
+      padding: 14px;
+    }
     .between { display: flex; justify-content: space-between; gap: 12px; align-items: start; }
     .row { display: flex; gap: 8px; align-items: center; }
     .wrap { flex-wrap: wrap; }
     .item-title { font-weight: 700; }
-    .meta { color: #6b7280; font-size: 14px; white-space: pre-wrap; }
-    .tag, .status { font-size: 12px; padding: 4px 8px; border-radius: 999px; background: #eef2ff; }
-    .status.good { background: #dcfce7; }
-    .status.bad { background: #fee2e2; }
-    .status.warn { background: #fef3c7; }
+    .meta { opacity: .72; font-size: 14px; white-space: pre-wrap; }
+    .tag, .status {
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: color-mix(in srgb, CanvasText 10%, transparent);
+    }
+    .status.good { background: #dcfce7; color: #166534; }
+    .status.bad { background: #fee2e2; color: #991b1b; }
+    .status.warn { background: #fef3c7; color: #92400e; }
     .qty { font-size: 28px; font-weight: 700; }
     .adjust-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 10px; }
-    .empty { color: #6b7280; padding: 14px; text-align: center; }
-    input[type="text"] { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid #d1d5db; }
+    .empty { opacity: .7; padding: 14px; text-align: center; }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid color-mix(in srgb, CanvasText 20%, transparent);
+      background: Canvas;
+      color: CanvasText;
+    }
     @media (max-width: 700px) {
       .adjust-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
@@ -46,7 +89,9 @@
     <button class="tab" data-tab="inventory">Inventory</button>
     <button class="tab" data-tab="notes">Notes</button>
     <button class="tab" data-tab="history">History</button>
-    <button class="tab" id="themeToggle">Theme</button>
+    <a class="linkbtn btn-secondary" href="https://account.vantive.com" target="_blank" rel="noopener">Vantive</a>
+    <a class="linkbtn btn-secondary" href="https://davita.welldyne.com" target="_blank" rel="noopener">WellDyne</a>
+    <button class="tab" id="dataActionBtn">Import / Export</button>
   </nav>
 
   <main>
@@ -57,9 +102,6 @@
           <button class="btn" id="addTreatmentBtn">Add Treatment</button>
           <button class="btn" id="addItemBtn">Add Inventory</button>
           <button class="btn" id="addNoteBtn">Add Note</button>
-          <button class="btn" id="exportBtn">Export</button>
-          <label class="btn" for="importFile" style="display:inline-block;">Import</label>
-          <input id="importFile" type="file" accept="application/json" style="display:none;" />
         </div>
       </div>
     </section>
@@ -111,7 +153,6 @@
     const $ = id => document.getElementById(id);
 
     const state = load() || {
-      theme: 'light',
       tab: 'home',
       treatments: [],
       inventory: [],
@@ -123,16 +164,9 @@
 
     function load(){ try { return JSON.parse(localStorage.getItem(KEY)); } catch { return null; } }
     function save(){ localStorage.setItem(KEY, JSON.stringify(state)); }
-
     function log(text){
       state.history.unshift({ at:new Date().toISOString(), text });
       state.history = state.history.filter(h => h && h.at && h.text).slice(0,50);
-      save();
-    }
-
-    function setTheme(theme){
-      state.theme = theme;
-      document.documentElement.dataset.theme = theme;
       save();
     }
 
@@ -344,15 +378,9 @@
       historyWindow.forEach(item => $('historyList').appendChild(treatmentEntry(item)));
     }
 
-    function highlightTabs(){
-      document.querySelectorAll('.tab').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === state.tab));
-    }
-
     function render(){
-      document.documentElement.dataset.theme = state.theme || 'light';
       renderCounts();
       renderViews();
-      highlightTabs();
       renderLists();
       save();
     }
@@ -364,32 +392,18 @@
       });
     });
 
-    $('themeToggle').addEventListener('click', () => setTheme((state.theme || 'light') === 'light' ? 'dark' : 'light'));
     $('addTreatmentBtn').addEventListener('click', addTreatment);
     $('addItemBtn').addEventListener('click', addInventoryItem);
     $('addNoteBtn').addEventListener('click', addNote);
 
-    document.querySelectorAll('[data-quick]').forEach(btn => btn.addEventListener('click', () => {
-      const t = btn.dataset.quick;
-      if (t === 'treatment') addTreatment();
-      if (t === 'inventory') addInventoryItem();
-      if (t === 'note') addNote();
-    }));
-
     document.body.addEventListener('click', (e) => {
-      const tabBtn = e.target.closest('[data-tab]');
-      if (tabBtn) {
-        e.preventDefault();
-        setTab(tabBtn.dataset.tab);
-        return;
-      }
-
       const edit = e.target.closest('[data-edit]');
       const del = e.target.closest('[data-del]');
       const adjust = e.target.closest('[data-adjust]');
       const order = e.target.closest('[data-order]');
       const showAllBtn = e.target.closest('[data-show-all-treatments]');
       const searchClear = e.target.closest('[data-clear-inventory-search]');
+      const dataAction = e.target.closest('#dataActionBtn');
 
       if (showAllBtn) {
         state.showAllTreatments = !state.showAllTreatments;
@@ -400,7 +414,49 @@
 
       if (searchClear) {
         state.inventorySearch = '';
+        $('inventoryList').previousElementSibling?.value = '';
         render();
+        return;
+      }
+
+      if (dataAction) {
+        const choice = prompt('Type "import" or "export"');
+        if (!choice) return;
+        const action = choice.trim().toLowerCase();
+        if (action === 'export') {
+          const blob = new Blob([JSON.stringify(state, null, 2)], { type:'application/json' });
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = 'dialysis-agent-companion.json';
+          a.click();
+          URL.revokeObjectURL(a.href);
+        } else if (action === 'import') {
+          const input = document.createElement('input');
+          input.type = 'file';
+          input.accept = 'application/json';
+          input.onchange = async () => {
+            const file = input.files[0];
+            if (!file) return;
+            try {
+              const data = JSON.parse(await file.text());
+              if (!data || typeof data !== 'object') throw new Error('Invalid file');
+              const imported = normalizeImportedData(data);
+              state.tab = imported.tab;
+              state.treatments = imported.treatments;
+              state.inventory = imported.inventory;
+              state.notes = imported.notes;
+              state.history = Array.isArray(imported.history) ? imported.history.filter(h => h && h.at && h.text) : [];
+              state.inventorySearch = '';
+              state.showAllTreatments = false;
+              log(`Imported backup: ${file.name}`);
+              save();
+              render();
+            } catch {
+              alert('That file could not be imported.');
+            }
+          };
+          input.click();
+        }
         return;
       }
 
@@ -441,25 +497,13 @@
       save();
     });
 
-    $('exportBtn').addEventListener('click', () => {
-      const blob = new Blob([JSON.stringify(state, null, 2)], { type:'application/json' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'dialysis-agent-companion.json';
-      a.click();
-      URL.revokeObjectURL(a.href);
-    });
-
     function normalizeImportedData(data){
       const out = {
-        theme: data.theme || 'light',
         tab: data.tab || data.activeTab || 'home',
         treatments: [],
         inventory: [],
         notes: [],
-        history: Array.isArray(data.history) ? data.history : [],
-        inventorySearch: '',
-        showAllTreatments: false
+        history: Array.isArray(data.history) ? data.history : []
       };
 
       if (Array.isArray(data.treatments)) out.treatments = data.treatments;
@@ -482,35 +526,6 @@
       return out;
     }
 
-    async function importFromFile(file){
-      if (!file) return;
-      try {
-        const data = JSON.parse(await file.text());
-        if (!data || typeof data !== 'object') throw new Error('Invalid file');
-        const imported = normalizeImportedData(data);
-        state.theme = imported.theme;
-        state.tab = imported.tab;
-        state.treatments = imported.treatments;
-        state.inventory = imported.inventory;
-        state.notes = imported.notes;
-        state.history = Array.isArray(imported.history) ? imported.history.filter(h => h && h.at && h.text) : [];
-        state.inventorySearch = '';
-        state.showAllTreatments = false;
-        log(`Imported backup: ${file.name}`);
-        save();
-        render();
-      } catch {
-        alert('That file could not be imported.');
-      }
-    }
-
-    $('importFile').addEventListener('change', async (e) => {
-      const file = e.target.files[0];
-      await importFromFile(file);
-      e.target.value = '';
-    });
-
-    setTheme(state.theme || 'light');
     setTab(state.tab || 'home');
     render();
   </script>
