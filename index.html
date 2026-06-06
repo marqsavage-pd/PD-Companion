@@ -106,7 +106,7 @@
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
       gap: 12px;
-      margin-top: 12px;
+      margin-top: 10px;
     }
     .dx-card {
       background: #fff;
@@ -136,6 +136,31 @@
     .dx-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
     .dx-summary .card { text-align: center; }
     .dx-loading { text-align: center; padding: 40px; opacity: .5; }
+    .dx-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: #f1f5f9;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-top: 14px;
+      border: 1px solid rgba(17,24,39,.08);
+      user-select: none;
+    }
+    .dx-section-header:hover { background: #e2e8f0; }
+    .dx-section-title { font-size: 15px; font-weight: 700; }
+    .dx-section-meta { font-size: 12px; opacity: .6; }
+    .dx-section-arrow { font-size: 13px; transition: transform 0.2s; }
+    .dx-section-arrow.open { transform: rotate(90deg); }
+    .dx-section-body { overflow: hidden; }
+    .dx-week-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #2563eb;
+      margin: 12px 0 4px;
+      padding-left: 2px;
+    }
 
     @media (max-width: 700px) {
       .dashboard-grid, .quick-links {
@@ -726,10 +751,10 @@
     function renderDxSummary() {
       const completed = dxRecords.filter(r => r.session_completed);
       const alerts = dxRecords.filter(r => isAlert(r));
-      const avgUF = completed.length
-        ? Math.round(completed.filter(r => r.total_uf_ml).reduce((a, r) => a + r.total_uf_ml, 0) / completed.filter(r => r.total_uf_ml).length)
+      const ufRecords = completed.filter(r => r.total_uf_ml);
+      const avgUF = ufRecords.length
+        ? Math.round(ufRecords.reduce((a, r) => a + r.total_uf_ml, 0) / ufRecords.length)
         : 0;
-
       $('dxSummary').innerHTML = `
         <div class="card">
           <div class="mini-label">Sessions (last 90d)</div>
@@ -746,65 +771,136 @@
       `;
     }
 
+    function makeDxCard(r) {
+      const alert = isAlert(r);
+      const status = dxStatus(r);
+      const card = document.createElement('div');
+      card.className = 'dx-card' + (alert ? ' alert' : '');
+      const statusBadge = {
+        complete: '<span class="dx-badge complete">✔ Complete</span>',
+        pending:  '<span class="dx-badge pending">⏳ Pending</span>',
+        skipped:  '<span class="dx-badge skipped">✗ Skipped</span>',
+      }[status] || '';
+      const dateObj = new Date(r.date + 'T12:00:00');
+      const dayLabel = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+      const preHtml = `
+        <div class="dx-row">
+          <div class="dx-stat"><span class="lbl">Weight</span><span class="val">${r.weight_lbs ? r.weight_lbs + ' lbs' : '—'}</span></div>
+          <div class="dx-stat"><span class="lbl">B/P</span><span class="val">${r.bp_sitting || '—'}</span></div>
+          <div class="dx-stat"><span class="lbl">Pulse</span><span class="val">${r.pulse || '—'}</span></div>
+          <div class="dx-stat"><span class="lbl">Temp</span><span class="val">${r.temp_f ? r.temp_f + '°F' : '—'}</span></div>
+          <div class="dx-stat"><span class="lbl">Dextrose</span><span class="val">${r.dextrose_concentration || '—'}</span></div>
+        </div>`;
+      const postHtml = (r.total_uf_ml || r.avg_dwell_time) ? `
+        <hr class="dx-divider"/>
+        <div class="dx-row">
+          <div class="dx-stat"><span class="lbl">Total UF</span><span class="val">${r.total_uf_ml ? r.total_uf_ml + ' mL' : '—'}</span></div>
+          <div class="dx-stat"><span class="lbl">Init Drain</span><span class="val">${r.initial_drain_ml != null ? r.initial_drain_ml + ' mL' : '—'}</span></div>
+          <div class="dx-stat"><span class="lbl">Avg Dwell</span><span class="val">${formatDwell(r.avg_dwell_time)}</span></div>
+          <div class="dx-stat"><span class="lbl">Lost Dwell</span><span class="val">${formatDwell(r.lost_dwell_time)}</span></div>
+        </div>` : '';
+      const notesHtml = (r.notes || r.misc_info)
+        ? `<div class="meta" style="margin-top:8px;font-size:12px;">${escapeHtml(r.notes || r.misc_info || '')}</div>`
+        : '';
+      card.innerHTML = `
+        <div class="dx-date">${dayLabel} ${statusBadge}</div>
+        ${preHtml}${postHtml}${notesHtml}
+      `;
+      return card;
+    }
+
+    function makeCollapsibleSection(title, meta, records, startOpen) {
+      const wrap = document.createElement('div');
+      const header = document.createElement('div');
+      header.className = 'dx-section-header';
+      header.innerHTML = `
+        <div>
+          <span class="dx-section-title">${title}</span>
+          <span class="dx-section-meta" style="margin-left:8px;">${meta}</span>
+        </div>
+        <span class="dx-section-arrow ${startOpen ? 'open' : ''}">▶</span>
+      `;
+      const body = document.createElement('div');
+      body.className = 'dx-section-body';
+      const grid = document.createElement('div');
+      grid.className = 'dx-grid';
+      records.forEach(r => grid.appendChild(makeDxCard(r)));
+      body.appendChild(grid);
+      if (!startOpen) body.style.display = 'none';
+      header.addEventListener('click', () => {
+        const open = body.style.display !== 'none';
+        body.style.display = open ? 'none' : '';
+        header.querySelector('.dx-section-arrow').classList.toggle('open', !open);
+      });
+      wrap.appendChild(header);
+      wrap.appendChild(body);
+      return wrap;
+    }
+
     function renderDxList() {
       const list = $('dxList');
       if (!dxRecords.length) {
         list.innerHTML = '<div class="dx-loading">No dialysis records found.</div>';
         return;
       }
-
       list.innerHTML = '';
-      const grid = document.createElement('div');
-      grid.className = 'dx-grid';
 
-      dxRecords.forEach(r => {
-        const alert = isAlert(r);
-        const status = dxStatus(r);
-        const sys = (r.bp_sitting || '—').split('/')[0];
-        const dia = (r.bp_sitting || '—').split('/')[1] || '—';
-        const card = document.createElement('div');
-        card.className = 'dx-card' + (alert ? ' alert' : '');
+      // ── 7-Day section ──
+      const today = new Date();
+      today.setHours(23, 59, 59, 999);
+      const sevenDaysAgo = new Date(today);
+      sevenDaysAgo.setDate(today.getDate() - 6);
+      sevenDaysAgo.setHours(0, 0, 0, 0);
 
-        const statusBadge = {
-          complete: '<span class="dx-badge complete">✔ Complete</span>',
-          pending:  '<span class="dx-badge pending">⏳ Pending</span>',
-          skipped:  '<span class="dx-badge skipped">✗ Skipped</span>',
-        }[status] || '';
-
-        let preHtml = `
-          <div class="dx-row">
-            <div class="dx-stat"><span class="lbl">Weight</span><span class="val">${r.weight_lbs ? r.weight_lbs + ' lbs' : '—'}</span></div>
-            <div class="dx-stat"><span class="lbl">B/P</span><span class="val">${r.bp_sitting || '—'}</span></div>
-            <div class="dx-stat"><span class="lbl">Pulse</span><span class="val">${r.pulse || '—'}</span></div>
-            <div class="dx-stat"><span class="lbl">Temp</span><span class="val">${r.temp_f ? r.temp_f + '°F' : '—'}</span></div>
-            <div class="dx-stat"><span class="lbl">Dextrose</span><span class="val">${r.dextrose_concentration || '—'}</span></div>
-          </div>`;
-
-        let postHtml = '';
-        if (r.total_uf_ml || r.avg_dwell_time) {
-          postHtml = `
-          <hr class="dx-divider"/>
-          <div class="dx-row">
-            <div class="dx-stat"><span class="lbl">Total UF</span><span class="val">${r.total_uf_ml ? r.total_uf_ml + ' mL' : '—'}</span></div>
-            <div class="dx-stat"><span class="lbl">Init Drain</span><span class="val">${r.initial_drain_ml != null ? r.initial_drain_ml + ' mL' : '—'}</span></div>
-            <div class="dx-stat"><span class="lbl">Avg Dwell</span><span class="val">${formatDwell(r.avg_dwell_time)}</span></div>
-            <div class="dx-stat"><span class="lbl">Lost Dwell</span><span class="val">${formatDwell(r.lost_dwell_time)}</span></div>
-          </div>`;
-        }
-
-        let notesHtml = '';
-        if (r.notes || r.misc_info) {
-          notesHtml = `<div class="meta" style="margin-top:8px;font-size:12px;">${escapeHtml(r.notes || r.misc_info || '')}</div>`;
-        }
-
-        card.innerHTML = `
-          <div class="dx-date">${r.date} ${statusBadge}</div>
-          ${preHtml}${postHtml}${notesHtml}
-        `;
-        grid.appendChild(card);
+      const recent = dxRecords.filter(r => {
+        const d = new Date(r.date + 'T12:00:00');
+        return d >= sevenDaysAgo && d <= today;
+      });
+      const older = dxRecords.filter(r => {
+        const d = new Date(r.date + 'T12:00:00');
+        return d < sevenDaysAgo;
       });
 
-      list.appendChild(grid);
+      // 7-day header (always open)
+      const weekHeader = document.createElement('div');
+      weekHeader.className = 'dx-week-label';
+      weekHeader.textContent = '📅 Last 7 Days';
+      list.appendChild(weekHeader);
+
+      if (recent.length) {
+        const grid = document.createElement('div');
+        grid.className = 'dx-grid';
+        recent.forEach(r => grid.appendChild(makeDxCard(r)));
+        list.appendChild(grid);
+      } else {
+        const empty = document.createElement('div');
+        empty.className = 'dx-loading';
+        empty.style.padding = '20px';
+        empty.textContent = 'No sessions in the last 7 days.';
+        list.appendChild(empty);
+      }
+
+      // ── Monthly sections ──
+      if (older.length) {
+        const byMonth = {};
+        older.forEach(r => {
+          const key = r.date.slice(0, 7); // YYYY-MM
+          if (!byMonth[key]) byMonth[key] = [];
+          byMonth[key].push(r);
+        });
+        const monthKeys = Object.keys(byMonth).sort().reverse();
+        monthKeys.forEach((key, idx) => {
+          const [yr, mo] = key.split('-');
+          const monthName = new Date(parseInt(yr), parseInt(mo) - 1, 1)
+            .toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+          const recs = byMonth[key];
+          const completed = recs.filter(r => r.session_completed).length;
+          const alerts = recs.filter(r => isAlert(r)).length;
+          const meta = `${completed} sessions${alerts ? ' · ' + alerts + ' alerts' : ''}`;
+          // First month collapsed by default (they're older), all collapsed
+          list.appendChild(makeCollapsibleSection(monthName, meta, recs, false));
+        });
+      }
     }
 
     async function loadDxData() {
