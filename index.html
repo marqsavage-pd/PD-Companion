@@ -406,7 +406,7 @@
 
     function showView(tab) {
       document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-      const map = { home: 'homeView', inventory: 'inventoryView', notes: 'notesView', dialysis: 'dialysisView' };
+      const map = { home: 'homeView', inventory: 'inventoryView', notes: 'notesView', dialysis: 'dialysisView', travel: 'travelView' };
       $(map[tab] || 'homeView').classList.add('active');
       document.querySelectorAll('.tab[data-tab]').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
     }
