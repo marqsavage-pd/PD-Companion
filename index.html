@@ -159,6 +159,32 @@
     .dx-home-badge.pending { background: #fef9c3; color: #854d0e; }
     .dx-home-badge.skipped { background: #fee2e2; color: #991b1b; }
 
+
+    /* ── Travel Tab ── */
+    .trip-card { background:#fff; border:1px solid rgba(17,24,39,.10); border-radius:14px; padding:14px; margin-bottom:12px; box-shadow:0 1px 2px rgba(0,0,0,.03); }
+    .trip-card.planning { border-left:4px solid #f59e0b; }
+    .trip-card.confirmed { border-left:4px solid #10b981; }
+    .trip-card.completed { border-left:4px solid #6b7280; }
+    .trip-card.cancelled { border-left:4px solid #ef4444; }
+    .trip-header { display:flex; justify-content:space-between; align-items:flex-start; }
+    .trip-dest { font-size:18px; font-weight:700; }
+    .trip-dates { font-size:12px; opacity:.6; margin-top:2px; }
+    .trip-badge { display:inline-block; padding:3px 10px; border-radius:999px; font-size:11px; font-weight:600; }
+    .trip-badge.Planning { background:#fef3c7; color:#92400e; }
+    .trip-badge.Confirmed { background:#d1fae5; color:#065f46; }
+    .trip-badge.Completed { background:#e5e7eb; color:#374151; }
+    .trip-badge.Cancelled { background:#fee2e2; color:#991b1b; }
+    .supply-row { display:flex; align-items:center; justify-content:space-between; padding:7px 0; border-bottom:1px solid rgba(17,24,39,.06); }
+    .supply-row:last-child { border-bottom:none; }
+    .supply-name { font-size:13px; font-weight:600; }
+    .supply-qty { font-size:12px; opacity:.6; }
+    .supply-status { font-size:11px; padding:2px 8px; border-radius:999px; font-weight:600; cursor:pointer; }
+    .supply-status.Needed { background:#fee2e2; color:#991b1b; }
+    .supply-status.Requested { background:#fef9c3; color:#854d0e; }
+    .supply-status.Confirmed { background:#dbeafe; color:#1e40af; }
+    .supply-status.On-Hand { background:#dcfce7; color:#166534; }
+    .travel-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+
     .dx-loading { text-align: center; padding: 40px; opacity: .5; }
     .dx-section-header {
       display: flex;
@@ -203,6 +229,7 @@
     <button class="tab" data-tab="inventory">Inventory</button>
     <button class="tab" data-tab="notes">Notes</button>
     <button class="tab" data-tab="dialysis">Dialysis</button>
+      <button class="tab" data-tab="travel">✈️ Travel</button>
     <button class="tab" id="backupBtn">Backup</button>
     <button class="tab" id="restoreBtn">Restore</button>
   </nav>
@@ -304,6 +331,17 @@
       </div>
     </section>
 
+
+    <section id="travelView" class="view">
+      <div class="panel">
+        <div class="between">
+          <h2>✈️ Travel Planner</h2>
+          <button class="btn" id="newTripBtn">+ New Trip</button>
+        </div>
+        <div id="tripList" style="margin-top:14px;"></div>
+      </div>
+    </section>
+
   </main>
 
   <script>
@@ -363,6 +401,7 @@
       if (tab === 'dialysis') loadDxData();
       if (tab === 'inventory' || tab === 'home') loadInventory();
       if (tab === 'home') renderHomeRecentSessions();
+      if (tab === 'travel') loadTravel();
     }
 
     function showView(tab) {
@@ -1116,6 +1155,200 @@
       if (r.ok) { log((delta > 0 ? 'Added ' : 'Took ') + amount + ' of ' + item.title); await loadInventory(); }
       return { ok: true, message: (delta > 0 ? 'Added ' : 'Took ') + amount + ' of ' + item.title + '.' };
     }
+
+
+    const TRAVEL_API = 'https://nova-8f2a8390.base44.app/functions/manageTravel';
+    let travelState = { trips: [], activeTrip: null, supplies: {} };
+
+    async function travelApi(payload) {
+      const res = await fetch(TRAVEL_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      return res.json();
+    }
+
+    async function loadTravel() {
+      const data = await travelApi({ action: 'list_trips' });
+      travelState.trips = data.trips || [];
+      renderTrips();
+    }
+
+    async function loadSupplies(trip_id) {
+      const data = await travelApi({ action: 'list_supplies', trip_id });
+      travelState.supplies[trip_id] = data.supplies || [];
+    }
+
+    function nightsBetween(d1, d2) {
+      const a = new Date(d1), b = new Date(d2);
+      return Math.max(1, Math.round((b - a) / 86400000));
+    }
+
+    function autoSupplyList(nights) {
+      return [
+        { item_name: 'Dialysate 2.5% 6L Bags', quantity_needed: nights * 6 },
+        { item_name: 'Mini Caps', quantity_needed: nights * 2 + 4 },
+        { item_name: '4x4 Woven Sponges', quantity_needed: nights * 2 + 4 },
+        { item_name: '2x2 Woven Sponges', quantity_needed: nights * 2 + 4 },
+        { item_name: 'Island Dressings', quantity_needed: nights + 2 },
+        { item_name: 'Betadine Solution', quantity_needed: 1 },
+        { item_name: 'Face Masks', quantity_needed: nights * 2 + 4 },
+        { item_name: 'Sterile Gloves', quantity_needed: nights * 2 + 4 },
+      ];
+    }
+
+    function supplyStatusOrder(s) {
+      return ['Needed','Requested','Confirmed','On Hand'].indexOf(s);
+    }
+
+    function nextStatus(s) {
+      const order = ['Needed','Requested','Confirmed','On Hand'];
+      const idx = order.indexOf(s);
+      return order[(idx + 1) % order.length];
+    }
+
+    async function renderTrips() {
+      const list = $('tripList');
+      if (!list) return;
+      if (!travelState.trips.length) {
+        list.innerHTML = '<div class="item" style="text-align:center;opacity:.5;padding:24px;">No trips yet. Tap + New Trip to get started.</div>';
+        return;
+      }
+      list.innerHTML = '<div style="opacity:.5;font-size:13px;text-align:center;padding:10px;">Loading trips...</div>';
+      // load all supplies
+      for (const t of travelState.trips) {
+        await loadSupplies(t.id);
+      }
+      list.innerHTML = '';
+      for (const trip of travelState.trips) {
+        const nights = trip.nights || (trip.depart_date && trip.return_date ? nightsBetween(trip.depart_date, trip.return_date) : '?');
+        const supplies = travelState.supplies[trip.id] || [];
+        const done = supplies.filter(s => s.status === 'On Hand').length;
+        const statusClass = (trip.status || 'Planning').toLowerCase();
+        const card = document.createElement('div');
+        card.className = `trip-card ${statusClass}`;
+        card.innerHTML = `
+          <div class="trip-header">
+            <div>
+              <div class="trip-dest">${escapeHtml(trip.destination || 'Unknown Destination')}</div>
+              <div class="trip-dates">${trip.depart_date || '?'} → ${trip.return_date || '?'} · ${nights} nights</div>
+            </div>
+            <span class="trip-badge ${trip.status || 'Planning'}">${trip.status || 'Planning'}</span>
+          </div>
+          ${trip.supplier_contact ? `<div class="small" style="margin-top:6px;opacity:.6;">📞 ${escapeHtml(trip.supplier_contact)}</div>` : ''}
+          ${trip.delivery_address ? `<div class="small" style="opacity:.6;">📍 ${escapeHtml(trip.delivery_address)}</div>` : ''}
+          ${trip.confirmation_number ? `<div class="small" style="opacity:.6;">🔖 Conf: ${escapeHtml(trip.confirmation_number)}</div>` : ''}
+          <div style="margin-top:12px;">
+            <div style="font-size:12px;font-weight:700;opacity:.5;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">
+              Supplies (${done}/${supplies.length} on hand)
+            </div>
+            <div id="supplyList_${trip.id}">
+              ${supplies.length ? '' : '<div style="opacity:.5;font-size:12px;">No supplies added yet.</div>'}
+            </div>
+          </div>
+          <div class="travel-actions">
+            <button class="btn" data-add-supply="${trip.id}">+ Supply</button>
+            <button class="btn" data-auto-supply="${trip.id}" data-nights="${nights}">Auto-fill Supplies</button>
+            <button class="btn" data-edit-trip="${trip.id}">Edit Trip</button>
+            <button class="btn" data-del-trip="${trip.id}">Delete</button>
+          </div>
+        `;
+        list.appendChild(card);
+        // render supplies
+        const supplyContainer = card.querySelector(`#supplyList_${trip.id}`);
+        supplies.sort((a,b) => supplyStatusOrder(a.status) - supplyStatusOrder(b.status));
+        supplies.forEach(s => {
+          const row = document.createElement('div');
+          row.className = 'supply-row';
+          const statusDisplay = (s.status || 'Needed').replace(' ', '-');
+          row.innerHTML = `
+            <div>
+              <div class="supply-name">${escapeHtml(s.item_name || '')}</div>
+              <div class="supply-qty">Needed: ${s.quantity_needed || 0} · Confirmed: ${s.quantity_confirmed || 0}</div>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <span class="supply-status ${statusDisplay}" data-cycle-supply="${s.id}" data-trip="${trip.id}" title="Tap to advance status">${s.status || 'Needed'}</span>
+              <button class="btn" style="padding:2px 8px;font-size:11px;" data-del-supply="${s.id}" data-trip="${trip.id}">✕</button>
+            </div>
+          `;
+          supplyContainer.appendChild(row);
+        });
+      }
+    }
+
+    async function newTrip() {
+      const dest = prompt('Destination (city/state)?');
+      if (!dest) return;
+      const depart = prompt('Departure date (YYYY-MM-DD)?');
+      const ret = prompt('Return date (YYYY-MM-DD)?');
+      const nights = (depart && ret) ? nightsBetween(depart, ret) : parseInt(prompt('How many nights?') || '1');
+      const data = await travelApi({ action: 'create_trip', data: { destination: dest, depart_date: depart, return_date: ret, nights, status: 'Planning' } });
+      if (data.ok) { travelState.trips.unshift(data.trip); await renderTrips(); }
+    }
+
+    async function editTrip(trip_id) {
+      const trip = travelState.trips.find(t => t.id === trip_id);
+      if (!trip) return;
+      const status = prompt('Status? (Planning / Confirmed / Completed / Cancelled)', trip.status || 'Planning');
+      const supplier = prompt('Supplier contact?', trip.supplier_contact || '');
+      const addr = prompt('Delivery address?', trip.delivery_address || '');
+      const conf = prompt('Confirmation number?', trip.confirmation_number || '');
+      const notes = prompt('Notes?', trip.notes || '');
+      const data = await travelApi({ action: 'update_trip', trip_id, data: { status, supplier_contact: supplier, delivery_address: addr, confirmation_number: conf, notes } });
+      if (data.ok) { await loadTravel(); }
+    }
+
+    async function autoFillSupplies(trip_id, nights) {
+      const existing = travelState.supplies[trip_id] || [];
+      if (existing.length && !confirm('This will add auto-calculated supplies to the list. Continue?')) return;
+      const list = autoSupplyList(parseInt(nights) || 1);
+      for (const item of list) {
+        await travelApi({ action: 'create_supply', data: { trip_id, ...item, quantity_confirmed: 0, status: 'Needed' } });
+      }
+      await loadTravel();
+    }
+
+    async function addSupply(trip_id) {
+      const name = prompt('Supply item name?');
+      if (!name) return;
+      const qty = parseInt(prompt('Quantity needed?') || '1');
+      await travelApi({ action: 'create_supply', data: { trip_id, item_name: name, quantity_needed: qty, quantity_confirmed: 0, status: 'Needed' } });
+      await loadTravel();
+    }
+
+    async function cycleSupplyStatus(supply_id, trip_id) {
+      const supply = (travelState.supplies[trip_id] || []).find(s => s.id === supply_id);
+      if (!supply) return;
+      const newStatus = nextStatus(supply.status || 'Needed');
+      const confirmed = newStatus === 'On Hand' ? (supply.quantity_needed || 0) : (supply.quantity_confirmed || 0);
+      await travelApi({ action: 'update_supply', supply_id, data: { status: newStatus, quantity_confirmed: confirmed } });
+      await loadTravel();
+    }
+
+    document.addEventListener('click', async e => {
+      if (e.target.id === 'newTripBtn') { await newTrip(); return; }
+      const addSupplyTrip = e.target.dataset.addSupply;
+      if (addSupplyTrip) { await addSupply(addSupplyTrip); return; }
+      const autoTrip = e.target.dataset.autoSupply;
+      if (autoTrip) { await autoFillSupplies(autoTrip, e.target.dataset.nights); return; }
+      const editTrip_ = e.target.dataset.editTrip;
+      if (editTrip_) { await editTrip(editTrip_); return; }
+      const delTrip = e.target.dataset.delTrip;
+      if (delTrip && confirm('Delete this trip and all its supplies?')) {
+        await travelApi({ action: 'delete_trip', trip_id: delTrip });
+        await loadTravel();
+        return;
+      }
+      const cycleSupply = e.target.dataset.cycleSupply;
+      if (cycleSupply) { await cycleSupplyStatus(cycleSupply, e.target.dataset.trip); return; }
+      const delSupply = e.target.dataset.delSupply;
+      if (delSupply) {
+        await travelApi({ action: 'delete_supply', supply_id: delSupply });
+        await loadTravel();
+        return;
+      }
+    });
 
   </script>
 </body>
